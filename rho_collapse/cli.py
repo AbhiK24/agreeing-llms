@@ -28,8 +28,12 @@ def _cmd_run(args: argparse.Namespace) -> int:
         # Restrict to the first N items per domain and only the first condition
         cfg.conditions = cfg.conditions[:1]
         limit = args.limit or 10
+        # Discover domains dynamically from the dataset so the CLI stays
+        # correct across dataset revisions (v0.1 was science/medicine/code;
+        # v0.2 is science/medicine/law).
+        counts = Loader(args.data).counts_by_domain()
         items = []
-        for domain in ("science", "medicine", "code"):
+        for domain in sorted(counts):
             items.extend(Loader(args.data).load(domain=domain, limit=limit))
         print(f"[cli] DRY-RUN — {len(items)} items × {len(cfg.conditions)} conditions")
     else:
