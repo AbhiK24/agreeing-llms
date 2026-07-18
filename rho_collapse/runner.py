@@ -66,6 +66,11 @@ class ConditionSpec:
     name: str
     committee: list[str]
     seeds: list[int]
+    # Optional per-condition temperature override. If None, falls back to
+    # the config-level `temperature` field. D1 (same-model, N seeds) MUST
+    # use T > 0 or all seeds produce identical outputs; D2/D3 (cross-family
+    # and cross-culture) can and should use T = 0 for reproducibility.
+    temperature: float | None = None
 
 
 @dataclass
@@ -146,15 +151,17 @@ class Runner:
                     continue
         return keys
 
-    def _agent_for(self, agent_name: str, seed: int) -> Agent:
-        key = (agent_name, seed)
+    def _agent_for(self, agent_name: str, seed: int, temperature: float) -> Agent:
+        # Cache by (name, seed, temperature) so per-condition temperature
+        # overrides get their own agent instance without rebuilding on every call.
+        key = (agent_name, seed, temperature)
         if key not in self._agents_cache:
             spec = self.config.models[agent_name]
             self._agents_cache[key] = build_agent(
                 provider=spec.provider,
                 model=spec.model,
                 seed=seed,
-                temperature=self.config.temperature,
+                temperature=temperature,
                 max_tokens=self.config.max_tokens,
             )
         return self._agents_cache[key]
@@ -171,7 +178,14 @@ class Runner:
         if self._stop_event.is_set():
             return {"skipped": True}
         try:
-            agent = self._agent_for(agent_name, seed)
+            # Per-condition temperature: D1 needs T > 0 to induce seed
+            # variation; D2/D3 use T = 0 for reproducibility.
+            temperature = (
+                condition.temperature
+                if condition.temperature is not None
+                else self.config.temperature
+            )
+            agent = self._agent_for(agent_name, seed, temperature)
             with self._rate_limiter.slot(agent_name):
                 comp = agent.complete(item.prompt)
             scored = scorer.score(item, comp.text)
@@ -187,6 +201,7 @@ class Runner:
                 "raw_response": comp.text,
                 "parsed_answer": scored["parsed_answer"],
                 "error": scored["error"],
+                "temperature": temperature,
                 # Needed downstream for Bayesian Condorcet posterior + cluster
                 # analysis. 4-way MedQA vs 10-way MMLU-Pro produce different
                 # posteriors under agreement.
@@ -373,6 +388,7 @@ class Runner:
                     "parsed_answer": r.get("parsed_answer"),
                     "num_choices": r.get("num_choices", 0),
                     "gold": r.get("gold"),
+                    "temperature": r.get("temperature"),
                 })
         df = pd.DataFrame(rows)
         df.to_parquet(self.errors_path, index=False)

@@ -76,6 +76,7 @@ def _cmd_report(args: argparse.Namespace) -> int:
                     "parsed_answer": r.get("parsed_answer"),
                     "num_choices": r.get("num_choices", 0),
                     "gold": r.get("gold"),
+                    "temperature": r.get("temperature"),
                 })
         pd.DataFrame(rows).to_parquet(errors_path, index=False)
         print(f"[cli] materialized {errors_path} from responses.jsonl")
