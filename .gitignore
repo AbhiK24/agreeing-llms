@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Run outputs (large, per-user, reproducible)
+runs/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Old dataset backups (superseded by combined.jsonl)
+data/*.bak
+data/combined.jsonl.frozen
+data/combined.jsonl.md5
