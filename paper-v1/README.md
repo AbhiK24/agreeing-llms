@@ -18,15 +18,20 @@ paper-v1/
 │   └── DATASET_README.md
 ├── config/
 │   └── experiment.yaml     the exact model list + rate limits + temperatures
-├── raw/                    the 11,250 API completions and derived artifacts
-│   ├── responses.jsonl     ← one JSON object per completion (~6 MB)
-│   ├── errors.parquet      ← M × N binary error matrix
-│   ├── rho_by_domain.json  ← ρ, N_eff, cluster analysis per cell
-│   ├── report.md           ← human-readable full report
-│   └── progress.json       ← end-of-run counters
-├── analysis/               ← the four analyses that produced the paper's findings
+├── raw/                                the 11,250 API completions and derived artifacts
+│   ├── responses.jsonl                 ← corrected scoring (fixed parser, current analysis)
+│   ├── responses.v1-scoring.jsonl.bak  ← original scoring (v0.1 parser bug, preserved for audit)
+│   ├── errors.parquet                  ← M × N binary error matrix (corrected)
+│   ├── rho_by_domain.json              ← ρ, N_eff, cluster analysis per cell (corrected)
+│   ├── report.md                       ← human-readable full report (corrected)
+│   └── progress.json                   ← end-of-run counters
+│
+│   The `raw_response` field is byte-identical between the two response
+│   files; only the derived `parsed_answer` and `error` fields differ.
+├── analysis/               ← the five analyses that produced the paper's findings
+│   ├── 00_parser_correction.md      the QA-caught parser bug + full recovery
 │   ├── 01_headline_rho.md
-│   ├── 02_kimi_confound.md
+│   ├── 02_kimi_confound.md          v0.1 story dissolved by parser fix
 │   ├── 03_overconfidence_gap.md
 │   └── 04_crossculture_finding.md
 ├── figures/                (empty in v1 — figures ship with v2)

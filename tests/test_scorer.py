@@ -38,6 +38,40 @@ def test_parse_mcq_returns_none_when_absent() -> None:
     assert parse_mcq_answer("I don't know.") is None
 
 
+# ── The labelled-option format bug we hit in the first live sweep ────────────
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        # Whole response IS the answer as "LETTER) full option text"
+        ("B) Oral amoxicillin therapy", "B"),
+        ("I) a population's gene frequency", "I"),
+        ("B) to be palpable both intra- and extraorally.", "B"),
+        # Same thing but with a preamble sentence — the answer is on the final line
+        ("Looking at this case:\n\nB) Oral amoxicillin therapy", "B"),
+        # Whole response uppercase letter with description
+        ("D) The correct answer here.", "D"),
+    ],
+)
+def test_parse_mcq_extracts_letter_paren_format(text: str, expected: str) -> None:
+    """The v0.1 parser missed 'B) description' style answers — nearly 1000
+    correct answers were lost on the first sweep. This test pins the fix."""
+    assert parse_mcq_answer(text) == expected
+
+
+def test_parse_mcq_does_not_confuse_option_listings_in_long_reasoning() -> None:
+    """A long reasoning trace that lists options like 'A) foo B) bar' but
+    doesn't emit a final answer should still return None — we won't accept
+    the first option letter as the answer just because the model discussed
+    the choices."""
+    reasoning = "Let me think about this. " * 40 + "Now looking at the options: A) foo B) bar C) baz."
+    # The reasoning is > 500 chars, so LETTER_PAREN_LINE_START (which requires
+    # the letter at line start) does not fire — no candidate matches.
+    result = parse_mcq_answer(reasoning)
+    # A false positive here would be catastrophic; we accept "unparseable" instead.
+    assert result is None
+
+
 # ── Scorer facade — MCQ ────────────────────────────────────────────────────
 
 def _mcq_item(gold: str) -> Item:

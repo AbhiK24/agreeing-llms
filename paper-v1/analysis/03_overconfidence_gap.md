@@ -1,104 +1,122 @@
-# Analysis 03 — Overconfidence gap by cluster size k
+# Analysis 03 — Overconfidence gap by cluster size k (corrected scoring)
 
-**Source:** `raw/rho_by_domain.json` cluster-analysis section, all 9 cells.
+**Source:** `raw/rho_by_domain.json` (post parser fix, see
+[`00_parser_correction.md`](./00_parser_correction.md)).
 
 ## The paper's core claim, quantified
 
 For each item, we cluster the 5 agents' parsed answers, take the size k
 of the largest same-answer cluster, and record whether that cluster's
-answer is the gold answer. Then:
+answer is the gold answer. Then compute:
 
-- **Naive posterior** — the confidence a Condorcet-style analysis would
-  assign, assuming per-agent independence, with per-agent accuracy p and
-  answer-space size C: P(correct | k agree) = p^k / (p^k + (C-1)·((1-p)/(C-1))^k)
-- **Observed correct rate** — the actual fraction of items in that bin
-  where the largest cluster was correct
-- **Overconfidence gap** — Naive − Observed. Positive = overconfident.
-- **Corrected posterior** — the same formula with k replaced by
-  k_eff = k · N_eff / N.
+- **Naive Condorcet posterior:** what a naive analyst would predict for
+  P(correct | k agree) under independence
+- **Corrected posterior:** the same formula with k → k · N_eff / N
+- **Observed correct rate:** the actual fraction where the largest
+  cluster was correct
+- **Overconfidence gap:** Naive − Observed (positive = overconfident)
 
-## Full table (only cells with ≥ 10 items in the bin shown)
+Only bins with n ≥ 10 items reported here (k=1 rows for law/medicine
+D3 have very few items due to high consensus). Full table in
+`raw/rho_by_domain.json`.
 
-Note: k=1 rows are noisy because "largest cluster" tie-breaks
-arbitrarily when no two agents agree.
+## The money numbers — k=2 agreement across every cell
 
-### Medicine — the cleanest signal
+| Cell | Naive P | Observed | Gap |
+|---|---|---|---|
+| Medicine D1 same-model | 0.985 | 0.778 | **+0.207** |
+| Medicine D2 Chinese | 0.975 | 0.450 | **+0.525** |
+| Medicine D3 cross-culture | 0.987 | 0.267 | **+0.720** |
+| Science D1 same-model | 0.982 | 0.741 | **+0.242** |
+| Science D2 Chinese | 0.987 | 0.677 | **+0.310** |
+| Science D3 cross-culture | 0.991 | 0.714 | **+0.277** |
+| Law D2 Chinese | 0.513 | 0.488 | +0.026 |
+| Law D3 cross-culture | 0.631 | 0.385 | **+0.246** |
+
+**The naive Condorcet posterior at k=2 (2 of 5 agents agree) is 95-99% in
+every domain where per-agent accuracy is > 0.6. Observed correct rate is
+27-78%.** Overconfidence gap: 20-72 percentage points.
+
+## Full cluster analysis by domain
+
+### Medicine — the most striking overconfidence
 
 | Cell | k | Items | Observed | Naive | Corrected | Gap |
 |---|---|---|---|---|---|---|
-| D1 same-model | 2 | 30 | 0.733 | 0.948 | 0.449 | **+0.215** |
-| D1 same-model | 3 | 52 | 0.846 | 0.996 | 0.676 | +0.149 |
-| D1 same-model | 4 | 62 | 0.887 | 1.000 | 0.842 | +0.113 |
-| D1 same-model | 5 | 73 | 0.918 | 1.000 | 0.931 | +0.082 |
-| D2 Chinese | 2 | 42 | 0.667 | 0.931 | 0.537 | **+0.265** |
-| D2 Chinese | 3 | 92 | 0.891 | 0.993 | 0.779 | +0.102 |
-| D2 Chinese | 4 | 85 | 0.918 | 0.999 | 0.915 | +0.082 |
-| D2 Chinese | 5 | 18 | 0.833 | 1.000 | 0.970 | +0.167 |
-| D3 cross-culture | 2 | 29 | 0.586 | 0.959 | 0.552 | **+0.372** |
-| D3 cross-culture | 3 | 70 | 0.886 | 0.997 | 0.795 | +0.111 |
-| D3 cross-culture | 4 | 127 | 0.906 | 1.000 | 0.924 | +0.094 |
-| D3 cross-culture | 5 | 20 | 0.900 | 1.000 | 0.974 | +0.100 |
+| D1 same-model | 2 | 18 | 0.778 | 0.985 | 0.410 | +0.207 |
+| D1 same-model | 3 | 21 | 0.619 | 0.999 | 0.620 | +0.380 |
+| D1 same-model | 4 | 40 | 0.775 | 1.000 | 0.794 | +0.225 |
+| D1 same-model | 5 | 154 | 0.935 | 1.000 | 0.901 | +0.065 |
+| D2 Chinese | 2 | 20 | 0.450 | 0.975 | 0.524 | **+0.525** |
+| D2 Chinese | 3 | 52 | 0.846 | 0.999 | 0.765 | +0.152 |
+| D2 Chinese | 4 | 86 | 0.895 | 1.000 | 0.906 | +0.105 |
+| D2 Chinese | 5 | 85 | 0.918 | 1.000 | 0.966 | +0.082 |
+| D3 cross-culture | 2 | 15 | 0.267 | 0.987 | 0.535 | **+0.720** |
+| D3 cross-culture | 3 | 28 | 0.643 | 0.999 | 0.777 | +0.357 |
+| D3 cross-culture | 4 | 86 | 0.907 | 1.000 | 0.913 | +0.093 |
+| D3 cross-culture | 5 | 119 | 0.916 | 1.000 | 0.970 | +0.084 |
 
 ### Science
 
 | Cell | k | Items | Observed | Naive | Corrected | Gap |
 |---|---|---|---|---|---|---|
-| D1 same-model | 2 | 28 | 0.821 | 0.975 | 0.449 | **+0.154** |
-| D1 same-model | 3 | 29 | 0.931 | 0.999 | 0.688 | +0.068 |
-| D1 same-model | 4 | 41 | 0.976 | 1.000 | 0.856 | +0.024 |
-| D1 same-model | 5 | 109 | 0.982 | 1.000 | 0.942 | +0.018 |
-| D2 Chinese | 2 | 32 | 0.781 | 0.975 | 0.593 | **+0.194** |
-| D2 Chinese | 3 | 48 | 0.938 | 0.999 | 0.841 | +0.061 |
-| D2 Chinese | 4 | 93 | 0.957 | 1.000 | 0.950 | +0.043 |
-| D2 Chinese | 5 | 57 | 1.000 | 1.000 | 0.986 | −0.000 |
-| D3 cross-culture | 2 | 22 | 0.682 | 0.979 | 0.661 | **+0.298** |
-| D3 cross-culture | 3 | 49 | 0.939 | 0.999 | 0.891 | +0.060 |
-| D3 cross-culture | 4 | 104 | 0.933 | 1.000 | 0.971 | +0.067 |
-| D3 cross-culture | 5 | 59 | 1.000 | 1.000 | 0.993 | −0.000 |
+| D1 same-model | 2 | 27 | 0.741 | 0.982 | 0.416 | +0.242 |
+| D1 same-model | 3 | 22 | 0.864 | 0.999 | 0.643 | +0.136 |
+| D1 same-model | 4 | 23 | 0.957 | 1.000 | 0.820 | +0.043 |
+| D1 same-model | 5 | 138 | 0.986 | 1.000 | 0.920 | +0.014 |
+| D2 Chinese | 2 | 31 | 0.677 | 0.987 | 0.573 | +0.310 |
+| D2 Chinese | 3 | 27 | 0.852 | 1.000 | 0.823 | +0.148 |
+| D2 Chinese | 4 | 73 | 0.959 | 1.000 | 0.942 | +0.041 |
+| D2 Chinese | 5 | 105 | 0.990 | 1.000 | 0.983 | +0.010 |
+| D3 cross-culture | 2 | 14 | 0.714 | 0.991 | 0.618 | +0.277 |
+| D3 cross-culture | 3 | 36 | 0.806 | 1.000 | 0.860 | +0.194 |
+| D3 cross-culture | 4 | 60 | 0.917 | 1.000 | 0.959 | +0.083 |
+| D3 cross-culture | 5 | 127 | 0.984 | 1.000 | 0.989 | +0.016 |
 
 ### Law
 
+Law's naive posteriors are much lower because per-agent accuracy is
+~0.25–0.32 rather than 0.7+. When individual agents are near-random the
+naive Condorcet math correctly does not compound weak signals into
+overconfidence — it's already conservative at low k.
+
 | Cell | k | Items | Observed | Naive | Corrected | Gap |
 |---|---|---|---|---|---|---|
-| D1 same-model | 3 | 22 | 0.636 | 0.632 | 0.220 | −0.004 |
-| D1 same-model | 4 | 34 | 0.853 | 0.804 | 0.269 | −0.049 |
-| D1 same-model | 5 | 18 | 0.833 | 0.908 | 0.326 | +0.075 |
-| D2 Chinese | 2 | 53 | 0.585 | 0.349 | 0.195 | −0.236 |
-| D2 Chinese | 3 | 45 | 0.800 | 0.526 | 0.252 | −0.274 |
-| D2 Chinese | 4 | 15 | 0.867 | 0.697 | 0.319 | −0.170 |
-| D3 cross-culture | 2 | 35 | 0.514 | 0.495 | 0.211 | −0.019 |
-| D3 cross-culture | 3 | 40 | 0.750 | 0.733 | 0.281 | −0.017 |
-| D3 cross-culture | 4 | 45 | 0.844 | 0.885 | 0.364 | +0.040 |
-
-Law's naive posteriors are low because per-agent accuracy is low
-(p ≈ 0.23), so the naive Condorcet formula doesn't overshoot — and in
-fact undershoots at low k because it can't distinguish random agreement
-from true agreement.
+| D1 same-model | 3 | 24 | 0.625 | 0.730 | 0.229 | +0.105 |
+| D1 same-model | 4 | 22 | 0.864 | 0.883 | 0.284 | +0.019 |
+| D1 same-model | 5 | 36 | 0.833 | 0.955 | 0.346 | +0.121 |
+| D2 Chinese | 2 | 41 | 0.488 | 0.513 | 0.203 | +0.026 |
+| D2 Chinese | 3 | 39 | 0.692 | 0.754 | 0.267 | +0.062 |
+| D2 Chinese | 4 | 39 | 0.769 | 0.899 | 0.342 | +0.130 |
+| D3 cross-culture | 2 | 26 | 0.385 | 0.631 | 0.204 | **+0.246** |
+| D3 cross-culture | 3 | 27 | 0.556 | 0.863 | 0.269 | **+0.308** |
+| D3 cross-culture | 4 | 30 | 0.767 | 0.959 | 0.345 | **+0.192** |
+| D3 cross-culture | 5 | 45 | 0.889 | 0.989 | 0.430 | +0.100 |
 
 ## Key observations
 
-1. **The overconfidence gap is largest at k=2** — small-cluster agreement
-   is dramatically overstated by naive Condorcet. Medicine D3 shows a
-   +0.372 gap: naive says 96%, actual is 59%.
-2. **The gap shrinks at k=4 and k=5** — when many agents agree, agreement
-   really does mean something, even in the naive analysis.
-3. **The corrected posterior closes most of the gap at k=3-5** but
-   overshoots at k=2 (becomes too pessimistic). This is a calibration
-   artifact of the simple k_eff = k · N_eff / N scaling; the paper's
-   discussion should acknowledge this as future work for a more
-   sophisticated correction.
-4. **Law is different** — with low per-agent accuracy, naive
-   posteriors are already conservative and there's no overconfidence to
-   correct for at small k. This is arguably the honest use case: low
-   confidence is warranted when models are individually bad at the task.
+1. **The overconfidence gap is enormous at k=2** when per-agent accuracy
+   is > 0.6 — up to +0.72 in medicine D3.
+2. **The N_eff correction closes most of the gap at k=4-5** but tends to
+   overshoot into pessimism at k=2-3. This is a scaling artifact of the
+   simple `k_eff = k · N_eff / N` correction and is discussed as future
+   work in the paper.
+3. **At k=5 (all 5 agents agree), naive posteriors are essentially 1.000
+   but observed correct rates are 92-99%.** Even universal committee
+   agreement leaves a 1-8 percentage-point overconfidence residual.
+4. **Law's low-accuracy regime shows a different pattern** — the naive
+   posterior at k=2 is only 0.51, matching observed 0.49. When individual
+   agents can't be trusted, agreement isn't over-interpreted. This
+   suggests the overconfidence problem is worst in the "smart-looking but
+   not smart enough" middle-accuracy band.
 
 ## The paper's headline number
 
-At **k=2** across the medicine and science cells:
+At k=2 across science and medicine cells (per-agent accuracy 0.6+):
 
 > When 2 LLM agents agree on a factual answer, naive Condorcet posterior
-> analyses (as used implicitly in every majority-vote consensus mechanism)
-> assign 95–98% confidence that the answer is correct. Observed correctness
-> is 59–78%. The overconfidence gap is 19–37 percentage points.
+> analyses assign 97-99% confidence that the answer is correct. Observed
+> correctness is 27-78% depending on domain and committee composition.
+> The overconfidence gap is 20-72 percentage points.
 
 That is the paper.

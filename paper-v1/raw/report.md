@@ -1,216 +1,217 @@
 # ρ-collapse run report
 
-_Generated 2026-07-19T02:57:03Z_
+_Generated 2026-07-19T03:17:08Z_
 
 ## Headline: ρ, N_eff, and saturation check
 
 | Domain | Condition | N | Items | Mean acc | ρ (95% CI) | N_eff / N | Saturated? |
 |---|---|---|---|---|---|---|---|
-| law | D1_same_model | 5 | 250 | 0.230 | 0.557 (0.486, 0.624) | 1.55 / 5 | no |
-| law | D2_cross_family_chinese | 5 | 250 | 0.206 | 0.302 (0.250, 0.351) | 2.27 / 5 | no |
-| law | D3_cross_culture | 5 | 250 | 0.259 | 0.427 (0.368, 0.486) | 1.85 / 5 | no |
-| medicine | D1_same_model | 5 | 250 | 0.602 | 0.415 (0.333, 0.486) | 1.88 / 5 | no |
-| medicine | D2_cross_family_chinese | 5 | 250 | 0.566 | 0.276 (0.216, 0.334) | 2.38 / 5 | no |
-| medicine | D3_cross_culture | 5 | 250 | 0.630 | 0.320 (0.250, 0.380) | 2.19 / 5 | no |
-| science | D1_same_model | 5 | 250 | 0.678 | 0.488 (0.417, 0.556) | 1.69 / 5 | no |
-| science | D2_cross_family_chinese | 5 | 250 | 0.677 | 0.320 (0.251, 0.383) | 2.19 / 5 | no |
-| science | D3_cross_culture | 5 | 250 | 0.697 | 0.279 (0.210, 0.349) | 2.36 / 5 | no |
+| law | D1_same_model | 5 | 250 | 0.258 | 0.638 (0.566, 0.700) | 1.41 / 5 | no |
+| law | D2_cross_family_chinese | 5 | 250 | 0.266 | 0.498 (0.434, 0.557) | 1.67 / 5 | no |
+| law | D3_cross_culture | 5 | 250 | 0.316 | 0.660 (0.600, 0.719) | 1.37 / 5 | no |
+| medicine | D1_same_model | 5 | 250 | 0.738 | 0.659 (0.576, 0.728) | 1.37 / 5 | no |
+| medicine | D2_cross_family_chinese | 5 | 250 | 0.690 | 0.413 (0.337, 0.479) | 1.89 / 5 | no |
+| medicine | D3_cross_culture | 5 | 250 | 0.755 | 0.473 (0.383, 0.548) | 1.73 / 5 | no |
+| science | D1_same_model | 5 | 250 | 0.713 | 0.586 (0.520, 0.655) | 1.49 / 5 | no |
+| science | D2_cross_family_chinese | 5 | 250 | 0.746 | 0.408 (0.330, 0.479) | 1.90 / 5 | no |
+| science | D3_cross_culture | 5 | 250 | 0.778 | 0.395 (0.312, 0.476) | 1.94 / 5 | no |
 
 ## Per-cell breakdown
 
 ### law × D1_same_model
 
-- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.230  |  **ρ:** 0.557 (95% CI 0.486, 0.624)  |  **N_eff:** 1.55  |  **C:** 9.3
+- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.258  |  **ρ:** 0.638 (95% CI 0.566, 0.700)  |  **N_eff:** 1.41  |  **C:** 9.3
 
 **Per-agent accuracy**
 
-- `deepseek_v4#1` — 0.260
-- `deepseek_v4#2` — 0.224
-- `deepseek_v4#3` — 0.204
-- `deepseek_v4#4` — 0.232
-- `deepseek_v4#5` — 0.232
+- `deepseek_v4#1` — 0.276
+- `deepseek_v4#2` — 0.248
+- `deepseek_v4#3` — 0.256
+- `deepseek_v4#4` — 0.260
+- `deepseek_v4#5` — 0.252
 
 **Cluster analysis** — for each item, the largest cluster of agents that picked the same letter. `Observed` = how often that cluster was actually correct; `Naive` = Condorcet posterior assuming independence; `Corrected` = same with k rescaled by N_eff / N; `Gap` = Naive − Observed (positive = overconfidence).
 
 | Largest cluster k | Items | Observed correct | Naive posterior | Corrected posterior | Overconfidence gap |
 |---|---|---|---|---|---|
-| 1 | 34 | 0.529 | 0.230 | 0.141 | -0.299 |
-| 2 | 21 | 0.524 | 0.418 | 0.177 | -0.106 |
-| 3 | 22 | 0.636 | 0.632 | 0.220 | -0.004 |
-| 4 | 34 | 0.853 | 0.804 | 0.269 | -0.049 |
-| 5 | 18 | 0.833 | 0.908 | 0.326 | 0.075 |
+| 1 | 27 | 0.444 | 0.258 | 0.143 | -0.186 |
+| 2 | 21 | 0.524 | 0.493 | 0.182 | -0.031 |
+| 3 | 24 | 0.625 | 0.730 | 0.229 | 0.105 |
+| 4 | 22 | 0.864 | 0.883 | 0.284 | 0.019 |
+| 5 | 36 | 0.833 | 0.955 | 0.346 | 0.121 |
 
 ### law × D2_cross_family_chinese
 
-- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.206  |  **ρ:** 0.302 (95% CI 0.250, 0.351)  |  **N_eff:** 2.27  |  **C:** 9.3
+- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.266  |  **ρ:** 0.498 (95% CI 0.434, 0.557)  |  **N_eff:** 1.67  |  **C:** 9.3
 
 **Per-agent accuracy**
 
 - `bytedance_seed#1` — 0.372
-- `deepseek_v4#1` — 0.212
+- `deepseek_v4#1` — 0.244
 - `glm_46#1` — 0.084
-- `kimi_k2#1` — 0.056
-- `qwen_3#1` — 0.304
+- `kimi_k2#1` — 0.292
+- `qwen_3#1` — 0.340
 
 **Cluster analysis** — for each item, the largest cluster of agents that picked the same letter. `Observed` = how often that cluster was actually correct; `Naive` = Condorcet posterior assuming independence; `Corrected` = same with k rescaled by N_eff / N; `Gap` = Naive − Observed (positive = overconfidence).
 
 | Largest cluster k | Items | Observed correct | Naive posterior | Corrected posterior | Overconfidence gap |
 |---|---|---|---|---|---|
-| 1 | 24 | 0.375 | 0.206 | 0.148 | -0.169 |
-| 2 | 53 | 0.585 | 0.349 | 0.195 | -0.236 |
-| 3 | 45 | 0.800 | 0.526 | 0.252 | -0.274 |
-| 4 | 15 | 0.867 | 0.697 | 0.319 | -0.170 |
+| 1 | 5 | 0.400 | 0.266 | 0.151 | -0.134 |
+| 2 | 41 | 0.488 | 0.513 | 0.203 | 0.026 |
+| 3 | 39 | 0.692 | 0.754 | 0.267 | 0.062 |
+| 4 | 39 | 0.769 | 0.899 | 0.342 | 0.130 |
+| 5 | 13 | 0.923 | 0.963 | 0.426 | 0.040 |
 
 ### law × D3_cross_culture
 
-- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.259  |  **ρ:** 0.427 (95% CI 0.368, 0.486)  |  **N_eff:** 1.85  |  **C:** 9.3
+- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.316  |  **ρ:** 0.660 (95% CI 0.600, 0.719)  |  **N_eff:** 1.37  |  **C:** 9.3
 
 **Per-agent accuracy**
 
 - `claude_sonnet#1` — 0.352
-- `deepseek_v4#1` — 0.248
+- `deepseek_v4#1` — 0.284
 - `gemini_pro#1` — 0.384
 - `gpt5_mini#1` — 0.256
-- `kimi_k2#1` — 0.056
+- `kimi_k2#1` — 0.304
 
 **Cluster analysis** — for each item, the largest cluster of agents that picked the same letter. `Observed` = how often that cluster was actually correct; `Naive` = Condorcet posterior assuming independence; `Corrected` = same with k rescaled by N_eff / N; `Gap` = Naive − Observed (positive = overconfidence).
 
 | Largest cluster k | Items | Observed correct | Naive posterior | Corrected posterior | Overconfidence gap |
 |---|---|---|---|---|---|
-| 1 | 14 | 0.357 | 0.259 | 0.155 | -0.098 |
-| 2 | 35 | 0.514 | 0.495 | 0.211 | -0.019 |
-| 3 | 40 | 0.750 | 0.733 | 0.281 | -0.017 |
-| 4 | 45 | 0.844 | 0.885 | 0.364 | 0.040 |
-| 5 | 3 | 1.000 | 0.956 | 0.455 | -0.044 |
+| 1 | 9 | 0.222 | 0.316 | 0.152 | 0.094 |
+| 2 | 26 | 0.385 | 0.631 | 0.204 | 0.246 |
+| 3 | 27 | 0.556 | 0.863 | 0.269 | 0.308 |
+| 4 | 30 | 0.767 | 0.959 | 0.345 | 0.192 |
+| 5 | 45 | 0.889 | 0.989 | 0.430 | 0.100 |
 
 ### medicine × D1_same_model
 
-- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.602  |  **ρ:** 0.415 (95% CI 0.333, 0.486)  |  **N_eff:** 1.88  |  **C:** 9.0
+- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.738  |  **ρ:** 0.659 (95% CI 0.576, 0.728)  |  **N_eff:** 1.37  |  **C:** 9.0
 
 **Per-agent accuracy**
 
-- `deepseek_v4#1` — 0.600
-- `deepseek_v4#2` — 0.592
-- `deepseek_v4#3` — 0.632
-- `deepseek_v4#4` — 0.612
-- `deepseek_v4#5` — 0.576
+- `deepseek_v4#1` — 0.752
+- `deepseek_v4#2` — 0.712
+- `deepseek_v4#3` — 0.748
+- `deepseek_v4#4` — 0.740
+- `deepseek_v4#5` — 0.740
 
 **Cluster analysis** — for each item, the largest cluster of agents that picked the same letter. `Observed` = how often that cluster was actually correct; `Naive` = Condorcet posterior assuming independence; `Corrected` = same with k rescaled by N_eff / N; `Gap` = Naive − Observed (positive = overconfidence).
 
 | Largest cluster k | Items | Observed correct | Naive posterior | Corrected posterior | Overconfidence gap |
 |---|---|---|---|---|---|
-| 1 | 26 | 0.500 | 0.602 | 0.242 | 0.102 |
-| 2 | 30 | 0.733 | 0.948 | 0.449 | 0.215 |
-| 3 | 52 | 0.846 | 0.996 | 0.676 | 0.149 |
-| 4 | 62 | 0.887 | 1.000 | 0.842 | 0.113 |
-| 5 | 73 | 0.918 | 1.000 | 0.931 | 0.082 |
+| 1 | 15 | 0.200 | 0.738 | 0.228 | 0.538 |
+| 2 | 18 | 0.778 | 0.985 | 0.410 | 0.207 |
+| 3 | 21 | 0.619 | 0.999 | 0.620 | 0.380 |
+| 4 | 40 | 0.775 | 1.000 | 0.794 | 0.225 |
+| 5 | 154 | 0.935 | 1.000 | 0.901 | 0.065 |
 
 ### medicine × D2_cross_family_chinese
 
-- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.566  |  **ρ:** 0.276 (95% CI 0.216, 0.334)  |  **N_eff:** 2.38  |  **C:** 9.0
+- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.690  |  **ρ:** 0.413 (95% CI 0.337, 0.479)  |  **N_eff:** 1.89  |  **C:** 9.0
 
 **Per-agent accuracy**
 
 - `bytedance_seed#1` — 0.808
-- `deepseek_v4#1` — 0.616
+- `deepseek_v4#1` — 0.744
 - `glm_46#1` — 0.532
-- `kimi_k2#1` — 0.120
-- `qwen_3#1` — 0.752
+- `kimi_k2#1` — 0.596
+- `qwen_3#1` — 0.772
 
 **Cluster analysis** — for each item, the largest cluster of agents that picked the same letter. `Observed` = how often that cluster was actually correct; `Naive` = Condorcet posterior assuming independence; `Corrected` = same with k rescaled by N_eff / N; `Gap` = Naive − Observed (positive = overconfidence).
 
 | Largest cluster k | Items | Observed correct | Naive posterior | Corrected posterior | Overconfidence gap |
 |---|---|---|---|---|---|
-| 1 | 13 | 0.154 | 0.566 | 0.276 | 0.412 |
-| 2 | 42 | 0.667 | 0.931 | 0.537 | 0.265 |
-| 3 | 92 | 0.891 | 0.993 | 0.779 | 0.102 |
-| 4 | 85 | 0.918 | 0.999 | 0.915 | 0.082 |
-| 5 | 18 | 0.833 | 1.000 | 0.970 | 0.167 |
+| 1 | 7 | 0.286 | 0.690 | 0.270 | 0.405 |
+| 2 | 20 | 0.450 | 0.975 | 0.524 | 0.525 |
+| 3 | 52 | 0.846 | 0.999 | 0.765 | 0.152 |
+| 4 | 86 | 0.895 | 1.000 | 0.906 | 0.105 |
+| 5 | 85 | 0.918 | 1.000 | 0.966 | 0.082 |
 
 ### medicine × D3_cross_culture
 
-- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.630  |  **ρ:** 0.320 (95% CI 0.250, 0.380)  |  **N_eff:** 2.19  |  **C:** 9.0
+- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.755  |  **ρ:** 0.473 (95% CI 0.383, 0.548)  |  **N_eff:** 1.73  |  **C:** 9.0
 
 **Per-agent accuracy**
 
-- `claude_sonnet#1` — 0.832
-- `deepseek_v4#1` — 0.588
+- `claude_sonnet#1` — 0.836
+- `deepseek_v4#1` — 0.736
 - `gemini_pro#1` — 0.812
 - `gpt5_mini#1` — 0.792
-- `kimi_k2#1` — 0.124
+- `kimi_k2#1` — 0.600
 
 **Cluster analysis** — for each item, the largest cluster of agents that picked the same letter. `Observed` = how often that cluster was actually correct; `Naive` = Condorcet posterior assuming independence; `Corrected` = same with k rescaled by N_eff / N; `Gap` = Naive − Observed (positive = overconfidence).
 
 | Largest cluster k | Items | Observed correct | Naive posterior | Corrected posterior | Overconfidence gap |
 |---|---|---|---|---|---|
-| 1 | 4 | 0.250 | 0.630 | 0.282 | 0.380 |
-| 2 | 29 | 0.586 | 0.959 | 0.552 | 0.372 |
-| 3 | 70 | 0.886 | 0.997 | 0.795 | 0.111 |
-| 4 | 127 | 0.906 | 1.000 | 0.924 | 0.094 |
-| 5 | 20 | 0.900 | 1.000 | 0.974 | 0.100 |
+| 1 | 2 | 0.500 | 0.755 | 0.275 | 0.255 |
+| 2 | 15 | 0.267 | 0.987 | 0.535 | 0.720 |
+| 3 | 28 | 0.643 | 0.999 | 0.777 | 0.357 |
+| 4 | 86 | 0.907 | 1.000 | 0.913 | 0.093 |
+| 5 | 119 | 0.916 | 1.000 | 0.970 | 0.084 |
 
 ### science × D1_same_model
 
-- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.678  |  **ρ:** 0.488 (95% CI 0.417, 0.556)  |  **N_eff:** 1.69  |  **C:** 9.8
+- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.713  |  **ρ:** 0.586 (95% CI 0.520, 0.655)  |  **N_eff:** 1.49  |  **C:** 9.8
 
 **Per-agent accuracy**
 
-- `deepseek_v4#1` — 0.692
-- `deepseek_v4#2` — 0.672
-- `deepseek_v4#3` — 0.656
-- `deepseek_v4#4` — 0.700
-- `deepseek_v4#5` — 0.668
+- `deepseek_v4#1` — 0.704
+- `deepseek_v4#2` — 0.708
+- `deepseek_v4#3` — 0.708
+- `deepseek_v4#4` — 0.736
+- `deepseek_v4#5` — 0.708
 
 **Cluster analysis** — for each item, the largest cluster of agents that picked the same letter. `Observed` = how often that cluster was actually correct; `Naive` = Condorcet posterior assuming independence; `Corrected` = same with k rescaled by N_eff / N; `Gap` = Naive − Observed (positive = overconfidence).
 
 | Largest cluster k | Items | Observed correct | Naive posterior | Corrected posterior | Overconfidence gap |
 |---|---|---|---|---|---|
-| 1 | 30 | 0.667 | 0.678 | 0.231 | 0.011 |
-| 2 | 28 | 0.821 | 0.975 | 0.449 | 0.154 |
-| 3 | 29 | 0.931 | 0.999 | 0.688 | 0.068 |
-| 4 | 41 | 0.976 | 1.000 | 0.856 | 0.024 |
-| 5 | 109 | 0.982 | 1.000 | 0.942 | 0.018 |
+| 1 | 29 | 0.655 | 0.713 | 0.219 | 0.058 |
+| 2 | 27 | 0.741 | 0.982 | 0.416 | 0.242 |
+| 3 | 22 | 0.864 | 0.999 | 0.643 | 0.136 |
+| 4 | 23 | 0.957 | 1.000 | 0.820 | 0.043 |
+| 5 | 138 | 0.986 | 1.000 | 0.920 | 0.014 |
 
 ### science × D2_cross_family_chinese
 
-- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.677  |  **ρ:** 0.320 (95% CI 0.251, 0.383)  |  **N_eff:** 2.19  |  **C:** 9.8
+- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.746  |  **ρ:** 0.408 (95% CI 0.330, 0.479)  |  **N_eff:** 1.90  |  **C:** 9.8
 
 **Per-agent accuracy**
 
 - `bytedance_seed#1` — 0.896
-- `deepseek_v4#1` — 0.688
+- `deepseek_v4#1` — 0.724
 - `glm_46#1` — 0.528
-- `kimi_k2#1` — 0.444
+- `kimi_k2#1` — 0.756
 - `qwen_3#1` — 0.828
 
 **Cluster analysis** — for each item, the largest cluster of agents that picked the same letter. `Observed` = how often that cluster was actually correct; `Naive` = Condorcet posterior assuming independence; `Corrected` = same with k rescaled by N_eff / N; `Gap` = Naive − Observed (positive = overconfidence).
 
 | Largest cluster k | Items | Observed correct | Naive posterior | Corrected posterior | Overconfidence gap |
 |---|---|---|---|---|---|
-| 1 | 20 | 0.450 | 0.677 | 0.287 | 0.227 |
-| 2 | 32 | 0.781 | 0.975 | 0.593 | 0.194 |
-| 3 | 48 | 0.938 | 0.999 | 0.841 | 0.061 |
-| 4 | 93 | 0.957 | 1.000 | 0.950 | 0.043 |
-| 5 | 57 | 1.000 | 1.000 | 0.986 | -0.000 |
+| 1 | 14 | 0.500 | 0.746 | 0.279 | 0.246 |
+| 2 | 31 | 0.677 | 0.987 | 0.573 | 0.310 |
+| 3 | 27 | 0.852 | 1.000 | 0.823 | 0.148 |
+| 4 | 73 | 0.959 | 1.000 | 0.942 | 0.041 |
+| 5 | 105 | 0.990 | 1.000 | 0.983 | 0.010 |
 
 ### science × D3_cross_culture
 
-- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.697  |  **ρ:** 0.279 (95% CI 0.210, 0.349)  |  **N_eff:** 2.36  |  **C:** 9.8
+- **Items scored:** 250  |  **Agents:** 5  |  **Mean per-agent acc:** 0.778  |  **ρ:** 0.395 (95% CI 0.312, 0.476)  |  **N_eff:** 1.94  |  **C:** 9.8
 
 **Per-agent accuracy**
 
-- `claude_sonnet#1` — 0.828
-- `deepseek_v4#1` — 0.736
+- `claude_sonnet#1` — 0.844
+- `deepseek_v4#1` — 0.776
 - `gemini_pro#1` — 0.792
 - `gpt5_mini#1` — 0.704
-- `kimi_k2#1` — 0.424
+- `kimi_k2#1` — 0.776
 
 **Cluster analysis** — for each item, the largest cluster of agents that picked the same letter. `Observed` = how often that cluster was actually correct; `Naive` = Condorcet posterior assuming independence; `Corrected` = same with k rescaled by N_eff / N; `Gap` = Naive − Observed (positive = overconfidence).
 
 | Largest cluster k | Items | Observed correct | Naive posterior | Corrected posterior | Overconfidence gap |
 |---|---|---|---|---|---|
-| 1 | 16 | 0.312 | 0.697 | 0.317 | 0.384 |
-| 2 | 22 | 0.682 | 0.979 | 0.661 | 0.298 |
-| 3 | 49 | 0.939 | 0.999 | 0.891 | 0.060 |
-| 4 | 104 | 0.933 | 1.000 | 0.971 | 0.067 |
-| 5 | 59 | 1.000 | 1.000 | 0.993 | -0.000 |
+| 1 | 13 | 0.231 | 0.778 | 0.298 | 0.548 |
+| 2 | 14 | 0.714 | 0.991 | 0.618 | 0.277 |
+| 3 | 36 | 0.806 | 1.000 | 0.860 | 0.194 |
+| 4 | 60 | 0.917 | 1.000 | 0.959 | 0.083 |
+| 5 | 127 | 0.984 | 1.000 | 0.989 | 0.016 |

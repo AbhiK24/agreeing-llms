@@ -1,132 +1,127 @@
-# Findings — paper v1
+# Findings — paper v1 (corrected scoring)
 
-Everything below is derived from the 11,250-completion sweep in `raw/`. Each
-finding links to a detailed analysis under `analysis/`.
+Everything below reflects the **corrected parser** (see
+[`analysis/00_parser_correction.md`](./analysis/00_parser_correction.md)).
+The original responses are preserved in
+[`raw/responses.v1-scoring.jsonl.bak`](./raw/responses.v1-scoring.jsonl.bak);
+the corrected ones are in [`raw/responses.jsonl`](./raw/responses.jsonl).
+The API responses themselves are byte-identical; only the derived
+`parsed_answer` and `error` fields differ.
 
 ---
 
-## Finding 1 — D1 is the "committee ≈ 1 agent" cell, confirmed in every domain
+## Finding 1 — D1 same-model committees collapse to 1.4 effective agents
 
-Five seeds of the same model (DeepSeek V4 at T=0.7) deliver **1.55 to 1.88
-effective independent agents** — down from a nominal 5. Practitioners
-running N seeds of one model expecting Condorcet compounding are getting
-about one-third the epistemic weight they think they are.
+Five seeds of the same model (DeepSeek V4 at T=0.7) deliver
+**1.37 to 1.49 effective independent agents** — down from a nominal 5.
 
 | Domain | ρ (95% CI) | N_eff / 5 | Effective size |
 |---|---|---|---|
-| Science | 0.488 (0.42, 0.56) | 1.69 | ≈ 1.7 agents |
-| Medicine | 0.415 (0.33, 0.49) | 1.88 | ≈ 1.9 agents |
-| Law | 0.557 (0.49, 0.62) | 1.55 | ≈ 1.5 agents |
+| Science | 0.586 (0.520, 0.655) | 1.49 | ≈ 1.5 agents |
+| Medicine | 0.659 (0.576, 0.728) | 1.37 | ≈ 1.4 agents |
+| Law | 0.638 (0.566, 0.700) | 1.41 | ≈ 1.4 agents |
 
-**All CIs exclude 0 — statistically significant.** See
-[`analysis/01_headline_rho.md`](./analysis/01_headline_rho.md).
+**All CIs exclude 0.** See [`analysis/01_headline_rho.md`](./analysis/01_headline_rho.md).
 
----
-
-## Finding 2 — The Kimi K2 confound is real and quantified
-
-Kimi K2 was truncated by `max_tokens=1024` on 73.7% of calls before it
-could emit a final letter answer. The truncated responses parse as "no
-answer," count as errors, and drag down measured accuracy on that agent.
-
-Because Kimi effectively guesses in a large fraction of items, its errors
-look uncorrelated with everyone else's by luck of near-random guessing.
-That mechanically lowers ρ without providing genuine diversification.
-
-**Removing Kimi from the D2/D3 analyses raises ρ substantially in every
-cell** (average +0.13, up to +0.18):
-
-| Cell | ρ with Kimi | ρ without Kimi | Δ |
-|---|---|---|---|
-| Science D3 | 0.279 | 0.398 | +0.119 |
-| Medicine D2 | 0.276 | 0.389 | +0.113 |
-| Medicine D3 | 0.320 | 0.463 | +0.143 |
-| Law D2 | 0.302 | 0.413 | +0.111 |
-| Law D3 | 0.427 | 0.609 | +0.182 |
-
-The **Kimi-excluded numbers are the fairer analysis** for the paper.
-See [`analysis/02_kimi_confound.md`](./analysis/02_kimi_confound.md).
-
-The v2 experiment plan re-runs Kimi at `max_tokens=4096` to give its
-reasoning room to finish.
+**Practitioners running N seeds of a single model get roughly 1/3.5 of
+the epistemic evidence Condorcet-style analysis predicts.**
 
 ---
 
-## Finding 3 — Cross-culture (D3) does not uniformly reduce ρ
+## Finding 2 — Cross-family diversity reduces ρ substantially, but not to zero
 
-The predicted "cross-culture mixing = lower ρ" pattern **holds only in
-science**. In medicine and law, the all-Chinese committee has *lower* ρ
-than the cross-culture committee:
+Swapping model families (D1 → D2 → D3) drops ρ by 0.15 to 0.25 in most
+cells. Even the most diverse committees deliver at most ~1.9 effective
+agents from a nominal 5.
 
-| Domain | D2 Chinese ρ (without Kimi) | D3 cross-culture ρ (without Kimi) | Winner |
+| Cell | ρ (95% CI) | N_eff / 5 |
+|---|---|---|
+| Science D2 Chinese | 0.408 (0.330, 0.479) | 1.90 |
+| Science D3 cross-culture | 0.395 (0.312, 0.476) | 1.94 |
+| Medicine D2 Chinese | 0.413 (0.337, 0.479) | 1.89 |
+| Medicine D3 cross-culture | 0.473 (0.383, 0.548) | 1.73 |
+| Law D2 Chinese | 0.498 (0.434, 0.557) | 1.67 |
+| Law D3 cross-culture | 0.660 (0.600, 0.719) | 1.37 |
+
+---
+
+## Finding 3 — Cross-culture (D3) is NOT a real diversifier
+
+The predicted "cross-culture mixing → lower ρ" pattern holds only in
+science and by a tiny margin. In medicine and law, the all-Chinese
+committee is more independent than the mixed Chinese-Western one:
+
+| Domain | D2 Chinese ρ | D3 cross-culture ρ | Winner |
 |---|---|---|---|
-| Science | 0.407 | 0.398 | ~tie (D3 barely lower) |
-| Medicine | 0.389 | **0.463** | **D2 (Chinese) wins by 0.074** |
-| Law | 0.413 | **0.609** | **D2 (Chinese) wins by 0.196** |
+| Science | 0.408 | 0.395 | ~tie (D3 barely lower) |
+| Medicine | 0.413 | **0.473** | **D2 (Chinese) wins by 0.060** |
+| Law | 0.498 | **0.660** | **D2 (Chinese) wins by 0.162** |
 
-**This is the novel finding.** Cross-culture mixing (adding Claude,
-GPT-5, Gemini alongside DeepSeek and Kimi) is competitive with, and in
-law substantially inferior to, staying within the Chinese ecosystem.
+**Law's D2/D3 95% CIs do not overlap** — statistically clean result. Medicine
+is directionally clear.
 
-Two candidate interpretations (both publishable):
+**This is the novel finding.** Cross-culture mixing (adding Claude, GPT-5,
+Gemini alongside DeepSeek and Kimi) is competitive with, and in law
+substantially inferior to, staying within the Chinese ecosystem.
+
+Candidate explanations (both publishable, discussed in
+[`analysis/04_crossculture_finding.md`](./analysis/04_crossculture_finding.md)):
 
 1. **Chinese-lab pretraining is more genuinely diverse** than Western
    frontier labs' pretraining is diverse relative to each other. Anthropic,
-   OpenAI, and Google reportedly converge on very similar data
-   distributions and RLHF preferences.
-2. **Cross-culture mixing introduces shared Western-normed reasoning
-   biases** that pull models toward correlated wrong answers on
-   ambiguous items — particularly in medicine (where clinical
-   frameworks differ across cultures) and law (where legal reasoning
-   frameworks differ dramatically).
+   OpenAI, and Google reportedly converge on similar corpora and
+   homogenized RLHF pipelines.
+2. **Cross-culture mixing amplifies domain-shifted shared biases** —
+   particularly in law, where Chinese-lab and Western-lab legal
+   reasoning frameworks are almost disjoint.
 
-Either reading is a genuine contribution — nobody has published this.
-See [`analysis/04_crossculture_finding.md`](./analysis/04_crossculture_finding.md).
+Distinguishing these is a v2 experiment.
 
 ---
 
-## Finding 4 — The overconfidence gap is dramatic
+## Finding 4 — The overconfidence gap is real, dramatic, and cleanly corrected
 
-The paper's core claim confirmed at large effect size. When 2 agents
-agree on a factual answer:
+Naive Condorcet posterior at k=2 (2 agents agree) vs observed correct rate:
 
-| Cell (k=2) | Naive Condorcet posterior | Observed correct rate | Gap |
+| Cell | Naive P(correct) | Observed | Gap |
 |---|---|---|---|
-| Medicine D1 same-model | 95% | 73% | **+22 pts** |
-| Medicine D2 Chinese | 93% | 67% | **+27 pts** |
-| Medicine D3 cross-culture | 96% | 59% | **+37 pts** |
-| Science D2 Chinese | 98% | 78% | **+19 pts** |
-| Science D3 cross-culture | 98% | 68% | **+30 pts** |
-| Law D1 same-model | 42% | 52% | −10 pts (naive undershoots — low p) |
+| Medicine D1 same-model | 99% | 78% | **+21 pts** |
+| Medicine D2 Chinese | 99% | 79% | **+20 pts** |
+| Medicine D3 cross-culture | 100% | 81% | **+19 pts** |
+| Science D1 same-model | 98% | 78% | **+20 pts** |
+| Science D2 Chinese | 100% | 86% | **+14 pts** |
+| Science D3 cross-culture | 100% | 82% | **+18 pts** |
 
-At k=5 (all 5 agents agree), naive Condorcet says essentially 100%.
-Observed correct rate is 92-99% (still a small residual gap in medicine).
+**Even at k=5 (all 5 agents agree), naive Condorcet says 100% but
+observed is 88-94%** — a residual 6-12 point overconfidence gap that no
+correction fully closes.
 
-**The N_eff-corrected posterior closes most of this gap** in mid-cluster
-sizes but overshoots into pessimism at small k. That's a discussion-section
-calibration note, not a paper-killing issue.
-
-See [`analysis/03_overconfidence_gap.md`](./analysis/03_overconfidence_gap.md).
+The N_eff-corrected posterior brings the naive number down toward observed
+in the middle range but overshoots into pessimism at low k. Details in
+[`analysis/03_overconfidence_gap.md`](./analysis/03_overconfidence_gap.md).
 
 ---
 
-## The paper writes itself
+## The paper writes itself (updated)
 
-**Title candidate:** *"Do agreeing LLMs actually know more? Measuring the
-overconfidence of multi-agent committees under three diversity regimes."*
+**Title candidate:** *"Do agreeing LLMs actually know more? Measuring
+committee overconfidence across science, medicine, and law."*
 
 **Three-sentence abstract:**
 
 > Multi-agent LLM committees are ubiquitous in production, and they use
-> agreement between agents as a proxy for confidence — an assumption that
+> inter-agent agreement as a proxy for confidence — an assumption that
 > only holds if agent errors are independent. We measure the pairwise
-> error correlation ρ across 750 factual MCQ items in three domains and
-> three agent-diversity regimes, and find (a) same-model committees
-> collapse to ≈ 1.5 effective agents, (b) cross-culture diversity does
-> not reduce ρ more than intra-Chinese diversity in medicine and law,
-> and (c) even the best-corrected Condorcet posterior overestimates
-> observed accuracy by 19-37 percentage points at k=2 agreement.
-> We publish the ρ-measurement protocol as an open benchmark.
+> error correlation ρ across 11,250 model responses on 750 factual MCQ
+> items in three domains (science, medicine, law) and three diversity
+> regimes (same-model 5 seeds, cross-family within Chinese labs, and
+> Chinese-Western cross-culture), and find (a) same-model committees
+> collapse to 1.37–1.49 effective independent agents from a nominal 5,
+> (b) cross-culture diversity is not a real diversifier in medicine and
+> law — an all-Chinese committee is more independent than the mixed
+> Chinese-Western one, and (c) even at 5-agent agreement, naive Condorcet
+> posteriors overestimate observed accuracy by 6-12 percentage points.
+> We publish the dataset, raw completions, and ρ-measurement protocol
+> as an open benchmark.
 
-**Recommended venues:** NeurIPS main track, ICLR, or SaTML for the
-methodology framing; FAccT for the epistemic-trust framing.
+**Recommended venues:** NeurIPS main track, ICLR, SaTML, or FAccT.

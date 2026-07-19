@@ -35,6 +35,21 @@ _ANSWER_PATTERNS = [
 
 _ISOLATED_LETTER = re.compile(r"^\s*([A-J])\s*$", flags=re.MULTILINE)
 
+# "B) description" — very common LLM output where the response IS the answer
+# in labelled-option form. We match only when the final non-empty line
+# contains EXACTLY ONE `LETTER)` pattern; if it contains multiple, the line
+# is an ambiguous listing (e.g. "Options: A) foo B) bar C) baz") rather
+# than an answer, and we refuse to guess.
+_LETTER_PAREN = re.compile(r"([A-J])\)\s+\S")
+
+
+def _final_nonempty_line(text: str) -> str | None:
+    for line in reversed(text.split("\n")):
+        line = line.strip()
+        if line:
+            return line
+    return None
+
 
 def parse_mcq_answer(text: str) -> str | None:
     """Return the parsed letter (A-J) or None if not recoverable.
@@ -43,6 +58,9 @@ def parse_mcq_answer(text: str) -> str | None:
       1. Explicit answer markers ("answer is B", "\\boxed{B}", "go with B", etc.).
       2. A letter alone on any line (e.g., a lone "B").
       3. A single-character response.
+      4. "B) description" — accept only if the final non-empty line has
+         exactly one `LETTER)` pattern (otherwise it is an ambiguous
+         listing of options, not an answer).
     """
     text = (text or "").strip()
     if not text:
@@ -56,6 +74,11 @@ def parse_mcq_answer(text: str) -> str | None:
         return m.group(1).upper()
     if len(text) == 1 and text in "ABCDEFGHIJ":
         return text
+    final = _final_nonempty_line(text)
+    if final:
+        matches = _LETTER_PAREN.findall(final)
+        if len(matches) == 1:
+            return matches[0].upper()
     return None
 
 

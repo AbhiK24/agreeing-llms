@@ -31,23 +31,27 @@ have.
 
 ---
 
-## L2 — Kimi K2 truncation confound
+## L2 — Original "Kimi K2 truncation confound" was actually a parser bug
 
-`max_tokens=1024` was insufficient for Kimi K2's chain-of-thought style;
-73.7% of its responses were truncated before the model emitted a final
-letter answer. Those calls parse as "no answer" (`parsed_answer=None`)
-and count as errors.
+During pre-publication sanity checks we discovered the v0.1 parser missed
+the `LETTER) description` answer format (see
+[`analysis/00_parser_correction.md`](./analysis/00_parser_correction.md)).
+Kimi K2 uses this format more than any other model — 66.9% of its
+apparent "unparseable" responses were in fact recoverable correct answers.
 
-**Effect:** Kimi's measured accuracy (21%) is a floor, not the ceiling of
-its capability. Because it's essentially guessing on most items, its
-errors look uncorrelated with everyone else's by luck, which
-mechanically lowers ρ in D2 (all-Chinese) and D3 (cross-culture).
+**After the parser fix:** Kimi K2's accuracy is 55.4%, right in the
+cluster with every other model (55-70%). It is not a competence outlier,
+and no analytical mitigation is needed. `analysis/02_kimi_confound.md`
+retains a brief Kimi-excluded sensitivity check for transparency.
 
-**Analytical mitigation in v1:** the primary D2/D3 analysis excludes
-Kimi. `analysis/02_kimi_confound.md` reports both.
+**Remaining truncation concern:** GLM 4.6 (a reasoning model) sits at
+38.1% accuracy under the corrected parser, well below the 55-70% cluster.
+Its `LETTER)` recovery rate was 0%, indicating a genuinely different
+issue — likely token-budget truncation on reasoning traces before the
+answer letter is emitted.
 
-**Fix in v2:** re-run Kimi at `max_tokens=4096`. Expected cost: ~$1.
-Re-runs of the other 7 agents are unnecessary.
+**Fix in v2:** re-run GLM 4.6 at `max_tokens=4096` on all 750 items × 2
+conditions (D2, D3) = 1,500 calls. Expected cost: <$1.
 
 ---
 
