@@ -1,0 +1,113 @@
+# ρ-collapse experiment config — Chinese-first via OpenRouter.
+#
+# Cost per 750-item sweep at these prices: ~$10-15 all-in.
+#
+# Rate-limit strategy
+# -------------------
+# We enforce TWO caps per model:
+#   * max_concurrent      — at most this many in-flight calls at once
+#   * requests_per_second — sustained throughput cap (token bucket)
+#
+# Defaults below are conservative for OpenRouter's standard tier. Bump them
+# if you have higher quota and want the sweep to finish faster. The global
+# ThreadPoolExecutor size (n_workers) caps total across-model concurrency;
+# per-model caps prevent any one provider from getting bursted.
+#
+# Cheaper Chinese models get slightly higher throughput; expensive Western
+# models get tighter limits because their upstream providers rate-limit
+# harder AND the per-call cost is worse if we get throttled and retry.
+
+run_id: rho-v1
+
+# Global default. Individual conditions may override — see D1 below.
+# D2 (cross-family Chinese) and D3 (cross-culture) both use T = 0 for
+# reproducibility. D1 (same-model, N seeds) uses T = 0.7 because with a
+# single model at T = 0 all seeds produce identical outputs, ρ collapses
+# to 1 by construction, and the cell carries no information.
+temperature: 0.0
+max_tokens: 1024
+n_workers: 12    # global concurrency cap — sum of per-model caps + slack
+
+models:
+  # ── Chinese labs ─────────────────────────────────────
+  # IDs verified against the live OpenRouter catalog on 2026-07-18.
+  deepseek_v4:
+    provider: openrouter
+    model: deepseek/deepseek-v4-pro
+    family: deepseek
+    max_concurrent: 4
+    requests_per_second: 5
+  kimi_k2:
+    provider: openrouter
+    model: moonshotai/kimi-k2
+    family: moonshot
+    max_concurrent: 4
+    requests_per_second: 5
+  qwen_3:
+    provider: openrouter
+    model: qwen/qwen3-235b-a22b
+    family: qwen
+    max_concurrent: 3
+    requests_per_second: 4
+  glm_46:
+    provider: openrouter
+    model: z-ai/glm-4.6
+    family: zhipu
+    # GLM is a reasoning model — slower per call, tighter concurrency to
+    # avoid stacking long-latency requests.
+    max_concurrent: 2
+    requests_per_second: 3
+  bytedance_seed:
+    provider: openrouter
+    model: bytedance-seed/seed-1.6
+    family: bytedance
+    max_concurrent: 3
+    requests_per_second: 4
+
+  # ── Western labs (for cross-culture D3) ──────────────
+  claude_sonnet:
+    provider: openrouter
+    model: anthropic/claude-sonnet-4.6
+    family: claude
+    max_concurrent: 3
+    requests_per_second: 3
+  gpt5_mini:
+    provider: openrouter
+    model: openai/gpt-5-mini
+    family: openai
+    max_concurrent: 3
+    requests_per_second: 4
+  gemini_pro:
+    provider: openrouter
+    model: google/gemini-2.5-pro
+    family: google
+    max_concurrent: 3
+    requests_per_second: 3
+
+conditions:
+  # D1 — worst case: same model, 5 seeds. If ρ is high here (predicted),
+  # this is the "committee ≈ 1 agent" cell that anchors the paper.
+  # MUST use T > 0: at T = 0 the same model + same prompt → same output for
+  # every seed, so ρ collapses to 1 by construction and the cell is empty.
+  D1_same_model:
+    temperature: 0.7
+    committee: [deepseek_v4, deepseek_v4, deepseek_v4, deepseek_v4, deepseek_v4]
+    seeds:     [1, 2, 3, 4, 5]
+
+  # D2 — cross-family within Chinese ecosystem. Tests whether different
+  # Chinese labs (all pretrained on overlapping Chinese + English web) still
+  # share enough failure structure to correlate. T = 0 (inherits) so the
+  # cell is fully reproducible — a reviewer running the same script gets
+  # bit-identical outputs, and no one can claim "high temperature inflated ρ."
+  D2_cross_family_chinese:
+    committee: [deepseek_v4, kimi_k2, qwen_3, glm_46, bytedance_seed]
+    seeds:     [1, 1, 1, 1, 1]
+
+  # D3 — CROSS-CULTURE. Mix Chinese and Western labs. The interesting
+  # question the paper can answer: does pretraining-corpus diversity across
+  # cultures materially reduce ρ, or is shared web infrastructure enough to
+  # make it moot? T = 0 (inherits) — this is the headline cell, and
+  # deterministic decoding removes any "cherry-picked seed" concern.
+  D3_cross_culture:
+    committee: [deepseek_v4, kimi_k2, claude_sonnet, gpt5_mini, gemini_pro]
+    seeds:     [1, 1, 1, 1, 1]
