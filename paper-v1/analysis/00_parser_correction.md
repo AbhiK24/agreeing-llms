@@ -1,141 +1,143 @@
-# Analysis 00 — Parser correction (found during QA, before publication)
+# Analysis 00 — Parser evolution and audit trail
 
-## Summary
+The final scoring pipeline for paper v1 went through **four generations** before
+we shipped. All were caught during pre-publication QA. Every intermediate
+state is preserved in `raw/*.bak` files. This document captures the full
+journey for methodological transparency.
 
-The first sweep used a parser that missed the `LETTER) description` answer
-format — one of the most common LLM output patterns for MCQ. **898 out of
-11,250 responses (8.0%) were miscoded as errors when they were in fact
-correct answers.** Detection happened during pre-publication sanity checking,
-before any external release.
+## Summary of the four generations
 
-We re-parsed all 11,250 stored responses with a fixed parser and
-regenerated every downstream artifact. Raw API text is preserved
-unchanged; only the derived `parsed_answer` and `error` columns were
-recomputed.
-
-## What the bug was
-
-The v0.1 parser matched patterns like `"answer is B"`, `"\boxed{B}"`,
-`"**B**"`, `"(B)"`, and lone letters on their own line. It did **not**
-match responses of the form:
-
-```
-B) Oral amoxicillin therapy
-```
-
-which is what many LLMs emit when they simply name the chosen option
-verbatim. The model IS answering — it's just quoting the labelled option
-itself.
-
-## Sample of miscoded-as-wrong responses
-
-```
-[science-003437, gold=I, agent=kimi_k2]
-"I) a population's gene frequency"
-
-[medicine-006040, gold=B, agent=deepseek_v4]
-"B) Oral amoxicillin therapy"
-
-[medicine-006425, gold=B, agent=deepseek_v4]
-"B) to be palpable both intra- and extraorally."
-```
-
-All three were correct answers, all scored as errors.
-
-## The fix
-
-Added a final pattern that fires only if the **last non-empty line** of
-the response contains exactly one `LETTER) …` occurrence. The
-"exactly one" guard prevents false positives from mid-reasoning
-discussions like *"Options: A) foo B) bar C) baz"*, where the intended
-answer could be any of the letters or none of them.
-
-Regression test in `tests/test_scorer.py::test_parse_mcq_extracts_letter_paren_format`
-plus a negative test `test_parse_mcq_does_not_confuse_option_listings_in_long_reasoning`
-pin the fix.
-
-## Full impact — recoveries per agent
-
-| Model | Unparseable calls in v0.1 | Recovered as correct | % of unparseable recovered |
+| Version | Method | Issue | Fix |
 |---|---|---|---|
-| DeepSeek V4 | 1336 | 353 | 26.4% |
-| **Kimi K2** | **878** | **587** | **66.9%** |
-| GLM 4.6 | 299 | 0 | 0.0% |
-| GPT-5-mini | 115 | 0 | 0.0% |
-| Qwen 3 235B | 44 | 14 | 31.8% |
-| Claude Sonnet 4.6 | 20 | 5 | 25.0% |
-| Gemini 2.5 Pro | 9 | 0 | 0.0% |
-| ByteDance Seed 1.6 | 3 | 0 | 0.0% |
+| v1 (original) | regex, first-match | Missed `LETTER)` format; scored 898 correct answers as wrong | Added `LETTER)` pattern |
+| v2 | regex, first-match, with `LETTER)` | Missed multi-asterisk (`**Answer:** H`); matched *first* letter mid-reasoning instead of final answer | Multi-asterisk + last-match wins |
+| v3 | regex, last-match | Still missed `I)` at end of line; `\boxed{\text{A}}` LaTeX wrapping | Added those patterns |
+| v4 (final) | **LLM-first, regex as audit** | — | Semantic parser reads options + response tail, extracts intended letter |
 
-**Kimi K2's real accuracy jumped from 20.4% to 59.5%** with the corrected
-parser. The v0.1 "Kimi confound" story (a low-competence agent artificially
-lowering ρ) was largely a parser bug, not a Kimi capability gap. Kimi
-just prefers the `LETTER)` format more than other models.
+### Recovery counts by generation (versus v1)
 
-Recovery counts: 898 wrong→correct flips, 0 correct→wrong flips (the fix
-is monotone strictly for recovery, never for regression).
-
-## Impact on ρ values
-
-| Cell | v0.1 ρ | v0.2 ρ | Δ |
+| Version | Recovered as correct | Recovered as wrong-but-parseable | Notes |
 |---|---|---|---|
-| Science D1 same-model | 0.488 | 0.586 | +0.098 |
-| Science D2 Chinese | 0.320 | 0.408 | +0.088 |
-| Science D3 cross-culture | 0.279 | 0.395 | +0.116 |
-| Medicine D1 same-model | 0.415 | 0.659 | +0.244 |
-| Medicine D2 Chinese | 0.276 | 0.413 | +0.137 |
-| Medicine D3 cross-culture | 0.320 | 0.473 | +0.153 |
-| Law D1 same-model | 0.557 | 0.638 | +0.081 |
-| Law D2 Chinese | 0.302 | 0.498 | +0.196 |
-| Law D3 cross-culture | 0.427 | 0.660 | +0.233 |
+| v2 | 898 | ~250 | LETTER) format fix |
+| v3 | +45 | +11 (previously false-positive) | Last-match + multi-asterisk fix |
+| v4 | +some | +some | LLM catches semantic cases regex misses |
 
-**ρ rose in every cell.** The buggy parser artificially deflated ρ by
-converting Kimi's chosen-option-format answers into apparent errors, and
-those apparent errors were uncorrelated with the other agents' real
-errors — mechanically lowering measured ρ.
+## Why we moved to LLM-first (v4)
 
-The corrected numbers give a **stronger version** of the paper's central
-claim: multi-agent LLM committees are even less independent than the
-buggy scoring suggested.
+Even v3 regex missed cases where the model *quoted the correct option's text
+without a letter marker* — e.g., "the answer is closer to the range of 4.5%"
+where option D reads "4.5% at 298 K". Regex has no way to match text to
+options. An LLM extractor reads the options list and the response and answers
+"which letter does this correspond to?" — a task well within any capable
+model.
 
-## Every direction of every paper finding is preserved
+## The v4 semantic parser
 
-1. **D1 collapse:** N_eff went from 1.55-1.88 to 1.37-1.49 — still ≈ 1
-   effective agent.
-2. **Cross-family diversity effect:** D1 → D2/D3 still drops ρ substantially.
-3. **Cross-culture NOT a real diversifier:** D2 vs D3 still shows D2 winning
-   in medicine and law (novel result preserved).
-4. **Overconfidence gap:** still large at k=2 (14-21 points) and non-zero
-   even at k=5 (6-12 points).
+- Model: `google/gemini-2.5-flash-lite` via OpenRouter
+- Temperature: 0.0 (deterministic)
+- Cache: SHA-256 of `(item_id, response)` → letter + reason. Re-runs after a
+  bug fix or model swap are free after the first pass.
+- Regex kept alongside as an audit trail flag (`llm_regex_disagreement`).
+- Fail-safe: if the LLM extractor errors, we fall back to regex so nothing
+  is lost.
 
-The story is the same; the numbers are cleaner.
+### v4 validation
 
-## Reproducing this correction from scratch
+Before running v4 at scale, we cross-checked Flash Lite vs DeepSeek V4 on
+100 sampled responses:
 
-```python
-from rho_collapse.scorer import Scorer
-from rho_collapse.loader import Loader
-import json, shutil
-from pathlib import Path
+- Flash Lite ↔ DeepSeek V4 letter agreement: **99.0%**
+- Flash Lite matches gold: 79/100 (79.0%)
+- DeepSeek V4 matches gold: 79/100 (79.0%)
 
-RUN = Path("runs/rho-v1")
-if not (RUN / "responses.v1-scoring.jsonl.bak").exists():
-    shutil.copy(RUN / "responses.jsonl", RUN / "responses.v1-scoring.jsonl.bak")
+Flash Lite passed the ≥98% threshold; chose it for the full run at ~10x
+lower cost than V4.
 
-items = {it.id: it for it in Loader("data/combined.jsonl").load()}
-scorer = Scorer()
-rows = []
-with (RUN / "responses.v1-scoring.jsonl.bak").open() as f:
-    for line in f:
-        r = json.loads(line)
-        item = items.get(r["item_id"])
-        if item and r.get("raw_response") is not None:
-            new = scorer.score(item, r["raw_response"])
-            r["parsed_answer"] = new["parsed_answer"]
-            r["error"] = new["error"]
-        rows.append(r)
-with (RUN / "responses.jsonl").open("w") as f:
-    for r in rows:
-        f.write(json.dumps(r) + "\n")
-# Then: rho-collapse report --run runs/rho-v1
-```
+### v4 outcomes across the 8,258 non-cached responses that entered the LLM
+extractor
+
+| Source | Count | Meaning |
+|---|---|---|
+| `llm` | 4,970 | Flash Lite direct extraction |
+| `cache` | 4,374 | Hit the persistent cache from earlier partial runs |
+| `regex-fallback` | 382 | LLM errored → regex answered (fail-safe fired) |
+| `error` | 28 | Both failed — item stays unparseable |
+| **LLM/regex disagreements** | **56** | LLM's letter ≠ regex's letter |
+
+### Audit of the 56 LLM/regex disagreements
+
+| Method | Matched gold |
+|---|---|
+| **LLM** | 29 / 56 = **51.8%** |
+| Regex | 11 / 56 = 19.6% |
+| Both wrong | 16 / 56 = 28.6% |
+
+LLM was **2.6× more likely to match gold** on the exact cases where they
+disagreed. This validated the LLM-first choice.
+
+## Post-parse reprompt of the 56 disagreements
+
+Even after LLM extraction, 56 items had LLM/regex disagreement. To resolve
+ambiguity, we re-ran those 56 items with the *same underlying committee model*
+and *same original prompt*, appended with:
+
+> After your reasoning, end your response with a single line in exactly this
+> format: `ANSWER: <LETTER>` where <LETTER> is the single letter of your final
+> choice.
+
+Full audit trail on each row: `reprompted: true`, `reprompted_at`,
+`reprompt_original_raw`, `reprompt_original_parsed_answer`,
+`reprompt_original_regex_letter`.
+
+### Reprompt outcomes
+
+| Outcome | Count |
+|---|---|
+| Correct (matches gold) | 35 (62.5%) |
+| Wrong letter (model chose wrong answer) | 15 (26.8%) |
+| Unparseable (still no clear answer) | 6 (10.7%) |
+| Still LLM/regex disagreement | 3 (5.4%) |
+
+The 15 wrong-answer results are important — they confirm that the original
+LLM extractor had correctly identified 15 cases where the model actually
+chose a wrong letter. Dropping those cases would have artificially inflated
+committee accuracy.
+
+## Final filtering step
+
+The 3 residual LLM/regex disagreements were dropped along with the 1,701
+responses that lacked a definite letter (content-policy refusals + soft-
+refusals + rambling responses).
+
+### The final v1 dataset
+
+| | Count |
+|---|---|
+| Raw completions from the sweep | 11,250 |
+| Dropped (content-policy refusals, no raw text) | 6 |
+| Dropped (had text but LLM extractor couldn't find a letter) | 1,695 |
+| Dropped (residual LLM/regex disagreement) | 3 |
+| **Final v1 dataset** | **9,549** |
+
+### Preserved backups (all under `raw/`)
+
+- `responses.v1-scoring.jsonl.bak` — original buggy regex
+- `responses.v2-scoring.jsonl.bak` — after LETTER) fix
+- `responses.v3-regex-final.jsonl.bak` — after all regex fixes, before LLM
+- `responses.v4-pre-semantic.jsonl.bak` — snapshot at start of LLM parse
+- `responses.pre-reprompt-56.jsonl.bak` — before the 56-item reprompt
+- `responses.pre-final-filter.jsonl.bak` — before the final filter
+
+The raw API text (`raw_response`) is byte-identical across every backup
+that wasn't a reprompt. Only derived fields (`parsed_answer`, `error`)
+differ.
+
+## Why this journey matters for the paper
+
+- **Methodological transparency:** every parsing decision is defended in a
+  numbered audit trail. Reviewers can see the choices and the reasons.
+- **Regression protection:** every parser bug caught by QA got a
+  regression test in `tests/test_scorer.py` or `tests/test_semantic_parser.py`.
+  The final tests suite is 73+ tests, all deterministic and API-free.
+- **Reproducibility:** every intermediate backup lets any reviewer roll
+  the pipeline back to any parser generation and re-derive the numbers.

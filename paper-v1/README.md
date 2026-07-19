@@ -18,16 +18,19 @@ paper-v1/
 │   └── DATASET_README.md
 ├── config/
 │   └── experiment.yaml     the exact model list + rate limits + temperatures
-├── raw/                                the 11,250 API completions and derived artifacts
-│   ├── responses.jsonl                 ← corrected scoring (fixed parser, current analysis)
-│   ├── responses.v1-scoring.jsonl.bak  ← original scoring (v0.1 parser bug, preserved for audit)
-│   ├── errors.parquet                  ← M × N binary error matrix (corrected)
-│   ├── rho_by_domain.json              ← ρ, N_eff, cluster analysis per cell (corrected)
-│   ├── report.md                       ← human-readable full report (corrected)
-│   └── progress.json                   ← end-of-run counters
+├── raw/                                the 9,549 responses used in the final analysis
+│   ├── responses.jsonl                              ← final: 9,549 rows, LLM-parsed, reprompted, filtered
+│   ├── responses.pre-final-filter.jsonl.bak         ← 11,250 rows before the filter
+│   ├── responses.pre-reprompt-56.jsonl.bak          ← state before reprompting the 56 disagreements
+│   ├── responses.v1-scoring.jsonl.bak               ← original scoring (v0.1 parser bug, audit)
+│   ├── errors.parquet                               ← M × N binary error matrix (final)
+│   ├── rho_by_domain.json                           ← ρ, N_eff, cluster analysis per cell (final)
+│   ├── report.md                                    ← human-readable full report (final)
+│   └── progress.json                                ← end-of-run counters
 │
-│   The `raw_response` field is byte-identical between the two response
-│   files; only the derived `parsed_answer` and `error` fields differ.
+│   The `raw_response` field is byte-identical across every backup that
+│   didn't involve a reprompt. Only derived fields (`parsed_answer`,
+│   `error`) differ across parser generations.
 ├── analysis/               ← the five analyses that produced the paper's findings
 │   ├── 00_parser_correction.md      the QA-caught parser bug + full recovery
 │   ├── 01_headline_rho.md

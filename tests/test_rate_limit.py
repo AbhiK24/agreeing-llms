@@ -138,3 +138,51 @@ def test_transient_errors_are_not_classified_as_permanent() -> None:
     assert not _is_permanent(Exception("500 Internal Server Error"))
     assert not _is_permanent(Exception("Connection timed out"))
     assert not _is_permanent(Exception("Read timeout"))
+
+
+# ── Content-policy refusal → academic-framing retry ────────────────────────
+
+def test_sensitive_refusal_is_recognised() -> None:
+    from rho_collapse.agents import _is_sensitive_refusal
+    assert _is_sensitive_refusal(Exception("SensitiveContentDetected"))
+    assert _is_sensitive_refusal(Exception("content_policy violation"))
+    assert _is_sensitive_refusal(Exception("Response was blocked by content filter"))
+    assert not _is_sensitive_refusal(Exception("429 Too Many Requests"))
+    assert not _is_sensitive_refusal(Exception("Invalid API key"))
+
+
+def test_sensitive_refusal_is_not_treated_as_permanent() -> None:
+    """Content-policy refusals must go to the retry path, not the fail-fast
+    path, so the academic-framing retry can fire."""
+    assert not _is_permanent(Exception("SensitiveContentDetected on prompt"))
+    assert not _is_permanent(Exception("content_policy: cannot provide"))
+
+
+def test_academic_framing_retry_fires_exactly_once() -> None:
+    """When a call raises SensitiveContentDetected on the first attempt, the
+    second attempt must use the academic-framing prefix; if it succeeds we
+    stop. If it still fails, we return to normal backoff cadence — the
+    reframing never repeats."""
+    import rho_collapse.agents as agents
+    from rho_collapse.agents import Agent, Completion, _ACADEMIC_FRAMING_PREFIX
+
+    calls_seen: list[str] = []
+
+    class _RefuseThenSucceed(Agent):
+        def __init__(self):
+            super().__init__(model="test", seed=1, temperature=0.0, max_tokens=10, max_retries=3)
+            self._n = 0
+
+        def _call(self, prompt):
+            calls_seen.append(prompt)
+            self._n += 1
+            if self._n == 1:
+                raise Exception("SensitiveContentDetected in the request")
+            return Completion(text="B", tokens_in=10, tokens_out=1, latency_ms=5)
+
+    result = _RefuseThenSucceed().complete("Original question")
+    assert result.text == "B"
+    assert len(calls_seen) == 2
+    assert calls_seen[0] == "Original question"
+    assert calls_seen[1].startswith(_ACADEMIC_FRAMING_PREFIX)
+    assert calls_seen[1].endswith("Original question")

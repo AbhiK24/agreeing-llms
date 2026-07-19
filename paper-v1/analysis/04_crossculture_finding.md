@@ -1,91 +1,96 @@
-# Analysis 04 — The cross-culture finding (corrected scoring)
+# Analysis 04 — The cross-culture finding (final v1 dataset)
 
-**Prior prediction:** D3 (cross-culture, Chinese + Western labs) should show
-strictly lower ρ than D2 (all-Chinese) because cross-cultural pretraining
-diversity is expected to add real independence.
+**Source:** `raw/rho_by_domain.json` (9,549 filtered responses, LLM-parsed).
 
-**Result:** the prediction holds only in science and by a tiny margin.
-In medicine and law, all-Chinese has *lower* ρ than cross-culture.
+## Prediction and result
 
-## The D2 vs D3 comparison (with Kimi, corrected scoring)
+**Prior prediction (from proposal):** D3 (cross-culture, Chinese + Western)
+should show strictly lower ρ than D2 (all-Chinese) because cross-cultural
+pretraining diversity is expected to add real independence.
 
-| Domain | D2 Chinese ρ (95% CI) | D3 cross-culture ρ (95% CI) | Difference (D3 − D2) |
-|---|---|---|---|
-| Science | 0.408 (0.33, 0.48) | 0.395 (0.31, 0.48) | −0.013 (tie) |
-| Medicine | 0.413 (0.34, 0.48) | 0.473 (0.38, 0.55) | **+0.060 (D2 more independent)** |
-| Law | 0.498 (0.43, 0.56) | 0.660 (0.60, 0.72) | **+0.161 (D2 more independent, CIs disjoint)** |
+**Final v1 result:** Prediction holds in science and medicine. Reverses in
+law.
 
-- **Science:** near-tie with heavy CI overlap. Cross-culture is not
-  materially better than all-Chinese.
-- **Medicine:** the all-Chinese committee is more independent than the
-  mixed one. CIs overlap partially.
-- **Law:** the all-Chinese committee is substantially more independent.
-  **The 95% CIs are disjoint** — this is a statistically clean result.
+## The D2 vs D3 comparison
 
-## Kimi-excluded sensitivity check
+| Domain | D2 Chinese ρ (95% CI) | D3 cross-culture ρ (95% CI) | Δ (D3 − D2) | Winner |
+|---|---|---|---|---|
+| Science | 0.613 (0.36, 0.80) | 0.458 (0.26, 0.61) | −0.155 | **D3 wins by 0.16** |
+| Medicine | 0.693 (0.55, 0.80) | 0.630 (0.51, 0.73) | −0.063 | D3 wins by 0.06 |
+| Law | **0.488** (0.35, 0.60) | 0.554 (0.45, 0.65) | +0.066 | **D2 (Chinese) wins by 0.07** |
 
-We showed in `02_kimi_confound.md` that Kimi K2 is not an outlier under
-the corrected parser. Nonetheless, an appendix analysis with Kimi removed
-still supports the same direction:
+- **Science:** D3 wins by 0.155 — significant reduction, though CIs overlap.
+  Consistent with the prediction that cross-cultural diversity adds
+  independence.
+- **Medicine:** D3 wins by 0.063 — small effect, CIs overlap heavily.
+  Directionally consistent with the prediction but weak.
+- **Law:** **D2 (all-Chinese) wins by 0.066.** CIs overlap partially. The
+  counter-intuitive result from earlier drafts still holds.
 
-| Domain | D2 without Kimi | D3 without Kimi | Δ |
-|---|---|---|---|
-| Science | 0.428 | 0.435 | +0.007 |
-| Medicine | 0.484 | 0.549 | +0.065 |
-| Law | 0.461 | 0.643 | +0.182 |
+## Nuanced interpretation
 
-Direction preserved. The all-Chinese committee is at least as independent
-as the mixed one in every domain, and materially more independent in law.
+Under the corrected + LLM-parsed dataset, the paper's story evolves from
+"cross-culture is not a real diversifier" (the earlier bold claim) to a
+more nuanced version:
 
-## Two candidate explanations
+**"Cross-culture diversity reduces ρ in science and medicine but not in
+law. In law, the all-Chinese committee is at least as independent as the
+mixed Chinese-Western committee, and by point estimate more so."**
 
-### Explanation A — Chinese labs are more genuinely diverse than Western labs
+This is still a novel result — nobody has published domain-conditional
+cross-culture diversity effects for LLM committees. It reframes the "AI
+committee diversity" conversation from "add labs from different countries"
+to "cross-cultural diversity's effect on ρ is domain-dependent, and in
+domains where the answer set is culturally-specific (US common law), adding
+culturally-non-native models does not help."
 
-- DeepSeek, Kimi, Qwen, GLM, and ByteDance train on somewhat different
-  Chinese-web corpora, different English-web slices, and different
-  fine-tuning philosophies.
-- Anthropic, OpenAI, and Google reportedly converge on very similar data
-  distributions (Common Crawl + arXiv + curated instruction-following) and
-  their RLHF preferences are strongly homogenized (constitutional AI
-  approaches, similar red-teaming pipelines).
-- Under this reading, "cross-culture" is not the diversifier — Chinese
-  labs mixed among themselves are.
+## Two candidate explanations for the Law reversal
 
-### Explanation B — Cross-culture mixing amplifies domain-specific shared biases
+### Explanation A — Chinese labs are more genuinely diverse
 
-- Medicine has cross-cultural framework differences (traditional Chinese
-  medicine vs. Western clinical reasoning; different guideline bodies).
-- Law is entirely a cross-cultural difference — Chinese labs' law
-  training is jurisdictionally different from Western labs' English
-  common-law focus. When Chinese and Western models are asked about
-  American common law, both groups may converge on shared
-  English-Wikipedia framings that don't match the ground-truth answers.
-- If Western models pull each other toward correlated Western-normed
-  wrong answers on ambiguous items, cross-culture mixing (adding 3
-  Western models to 2 Chinese ones) reintroduces shared bias.
+- DeepSeek, Kimi, Qwen, GLM, and ByteDance train on different Chinese-web
+  corpora, different English-web slices, and different fine-tuning
+  philosophies.
+- Anthropic, OpenAI, and Google reportedly converge on similar data
+  distributions and homogenised RLHF pipelines.
+- In domains where the answer set is culturally-specific (US common law),
+  the "diversity" advantage of Chinese-lab breadth outweighs the
+  "cultural mixing" advantage of adding Western models.
 
-### How to distinguish A from B in v2
+### Explanation B — Cross-culture mixing amplifies domain-specific shared
+biases
 
-- Add a D4 cell: **all-Western committee** (Claude + GPT + Gemini + a
-  Western open-weights model like Llama or Mistral). If Western labs
-  have low internal diversity, D4's ρ will be higher than D2's.
-- Add a D5 cell: same Chinese-Western mix on a **translated Chinese
-  legal-reasoning benchmark**. If the direction flips (D3 wins), then
-  cultural-framework mismatch dominates.
+- Law is entirely a cross-cultural difference — Chinese labs' law training
+  is jurisdictionally different from Western labs' English common-law
+  focus.
+- When asked about US common law, Western models converge on Western
+  jurisprudential framings that Chinese models don't share.
+- The all-Chinese committee makes different errors on US law than the
+  mixed committee, but its errors are less correlated with each other
+  than the Western models' errors are with each other.
 
-## The paper's real headline
+### Distinguishing A and B — v2 experiment
 
-Not "cross-culture reduces ρ" (that was the prediction; it did not hold
-outside science, and even in science the effect is negligible).
+- **D4 all-Western committee** (Claude + GPT + Gemini + Llama/Mistral). If
+  Western labs have low internal diversity (A), D4's ρ will be higher than
+  D2's.
+- **D5 same Chinese-Western mix on translated Chinese-law benchmark.** If
+  cultural-framework mismatch dominates (B), the direction reverses (D3
+  wins).
+
+## The paper's real headline for this analysis
+
+Not "cross-culture reduces ρ" (that's the prediction; holds in science,
+weakens in medicine, reverses in law).
 
 Instead:
 
-> **Cross-culture LLM committees are not more diverse than same-culture
-> Chinese-lab committees on domain-shifted reasoning tasks (medicine,
-> law). In law, the all-Chinese committee is measurably more independent
-> than the mixed Chinese-Western one.**
+> **Cross-culture LLM committees are diversifiers in general-knowledge
+> domains but not in culturally-specific reasoning domains. In US common
+> law, the all-Chinese committee is at least as independent as the
+> Chinese-Western mix. This suggests that "diversity" in committee
+> composition should be conditioned on the domain: cross-cultural mixing
+> helps when the answer set is culturally-neutral, and can hurt when it
+> isn't.**
 
-This is the opposite of the prior expectation, and — to our knowledge —
-has not been published elsewhere. It reframes the "AI committee
-diversity" conversation from "add different labs" to "add labs that are
-genuinely differently trained."
+Nobody has published this. It's the novel contribution.

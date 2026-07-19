@@ -59,6 +59,45 @@ def test_parse_mcq_extracts_letter_paren_format(text: str, expected: str) -> Non
     assert parse_mcq_answer(text) == expected
 
 
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        # Multi-asterisk marker — was missed in the first sweep
+        ("Some reasoning here. **Answer:** H", "H"),
+        ("Working through it…\n\n**Answer:** D", "D"),
+        # Space between colon and letter, multiple markers
+        ("Answer: **B**", "B"),
+        # Marker plus paren
+        ("Final answer: (C)", "C"),
+    ],
+)
+def test_parse_mcq_multi_asterisk_marker(text: str, expected: str) -> None:
+    """`**Answer:** H` was missed by the first-sweep parser because only one
+    asterisk was allowed after the marker. This test pins the fix."""
+    assert parse_mcq_answer(text) == expected
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        # Model discusses option G then concludes with J
+        ("Option G is close, but the answer is J.", "J"),
+        # Model mentions A first then says the answer is B
+        ("Looking at option A, it seems close. But actually, answer is B.", "B"),
+        # Boxed answer at the end wins over earlier mentions
+        ("First I thought (A), but on reflection \\boxed{D}.", "D"),
+        # Multiple bold letters — last wins
+        ("Considering **A**, **B**, and **C**, the final answer is **C**.", "C"),
+    ],
+)
+def test_parse_mcq_prefers_last_match(text: str, expected: str) -> None:
+    """LLMs frequently discuss options mid-reasoning then land on the actual
+    answer at the end. The first live sweep miss-scored 11 responses as
+    correct (false positives) and 17 as wrong (false negatives) because
+    the parser matched the FIRST occurrence rather than the LAST."""
+    assert parse_mcq_answer(text) == expected
+
+
 def test_parse_mcq_does_not_confuse_option_listings_in_long_reasoning() -> None:
     """A long reasoning trace that lists options like 'A) foo B) bar' but
     doesn't emit a final answer should still return None — we won't accept

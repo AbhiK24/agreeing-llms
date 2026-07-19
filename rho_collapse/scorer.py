@@ -20,11 +20,18 @@ from rho_collapse.loader import Item
 # they appear as English words ("A", "I'll", "I don't"). We refuse to fire
 # a fallback on unadorned letters — if the model didn't follow instructions,
 # we prefer to record "unparseable" (which counts as an error).
+#
+# Every pattern is scanned with re.finditer and we take the LAST match, not
+# the first. LLMs discuss options mid-reasoning ("option G represents…")
+# then conclude with the actual answer ("The answer is J"). Matching the
+# first occurrence returned wrong letters and caused false positives in
+# both directions.
 _ANSWER_PATTERNS = [
-    # "The final answer is B", "answer: B", "correct answer B"
-    r"(?:final\s+answer|correct\s+answer|answer)\s*(?:is|=|:)?\s*[\*\(\[]?\s*([A-J])\b",
-    # "\boxed{B}"
-    r"\\boxed\{\s*([A-J])\s*\}",
+    # "The final answer is B", "answer: B", "correct answer B",
+    # "**Answer:** H" — allow multiple markers and whitespace after the marker.
+    r"(?:final\s+answer|correct\s+answer|answer)\s*(?:is|=|:)?\s*[\*\(\[\s]{0,5}([A-J])\b",
+    # "\boxed{B}", "\boxed{\text{B}}" (LaTeX with text wrapper — Qwen uses this)
+    r"\\boxed\{\s*(?:\\text\{\s*)?([A-J])(?:\s*\})?\s*\}",
     # "go with B", "choose B", "pick B", "select B", "option B"
     r"(?:go\s+with|choose|pick|select|option)\s+[\*\(\[]?\s*([A-J])\b",
     # Bold or bracketed lone letter
@@ -32,6 +39,11 @@ _ANSWER_PATTERNS = [
     r"\(([A-J])\)",
     r"\[([A-J])\]",
 ]
+
+# Kimi and others sometimes emit just "I)" or "B)" as the entire final line —
+# a truncated version of "B) full option text" where the option text got cut.
+# Only match when the final line is essentially just the letter + closing paren.
+_LETTER_PAREN_ONLY_FINAL = re.compile(r"^\s*([A-J])\)\s*\.?\s*$")
 
 _ISOLATED_LETTER = re.compile(r"^\s*([A-J])\s*$", flags=re.MULTILINE)
 
@@ -65,10 +77,13 @@ def parse_mcq_answer(text: str) -> str | None:
     text = (text or "").strip()
     if not text:
         return None
+    # LAST match wins. Models often discuss options before landing on the
+    # final answer; the leftmost match caused both directions of scoring
+    # errors on the first live sweep.
     for pat in _ANSWER_PATTERNS:
-        m = re.search(pat, text, flags=re.IGNORECASE)
-        if m:
-            return m.group(1).upper()
+        matches = list(re.finditer(pat, text, flags=re.IGNORECASE))
+        if matches:
+            return matches[-1].group(1).upper()
     m = _ISOLATED_LETTER.search(text)
     if m:
         return m.group(1).upper()
@@ -76,6 +91,11 @@ def parse_mcq_answer(text: str) -> str | None:
         return text
     final = _final_nonempty_line(text)
     if final:
+        # Final line is just "B)" — accept as answer
+        m = _LETTER_PAREN_ONLY_FINAL.match(final)
+        if m:
+            return m.group(1).upper()
+        # Final line has exactly one "B) description" pattern
         matches = _LETTER_PAREN.findall(final)
         if len(matches) == 1:
             return matches[0].upper()
