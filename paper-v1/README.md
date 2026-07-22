@@ -36,7 +36,13 @@ paper-v1/
 │   ├── 01_headline_rho.md
 │   ├── 02_kimi_confound.md          v0.1 story dissolved by parser fix
 │   ├── 03_overconfidence_gap.md
-│   └── 04_crossculture_finding.md
+│   ├── 04_crossculture_finding.md
+│   └── 05_committee_selection.md    post-freeze: enumeration, transfer
+│                                    failure, and the DEFT algorithm
+│                                    (reads frozen raw/ only)
+├── committee-selection/    post-freeze DEFT result tables (report.md,
+│                           committees.csv, selection_eval.json,
+│                           calibration_by_committee.csv)
 ├── figures/                (empty in v1 — figures ship with v2)
 └── paper/
     └── draft.md            paper skeleton grown out of the FINDINGS.md

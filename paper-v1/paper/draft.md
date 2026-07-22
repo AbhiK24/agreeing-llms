@@ -1,7 +1,14 @@
-# Do agreeing LLMs actually know more?
+# Five Agents, One Vote: Measuring — and Pricing — the Independence Collapse in LLM Committees
 
-**Working title.** *Measuring the overconfidence of multi-agent LLM
-committees under three diversity regimes across science, medicine, and law.*
+**Title.** *Five Agents, One Vote: Measuring — and Pricing — the
+Independence Collapse in LLM Committees.*
+
+**Alternates considered:** "Do agreeing LLMs actually know more?"
+(original working title, keeps the question framing); "Agreement Is Not
+Evidence" (punchier, less specific). "Five Agents, One Vote" states the
+headline number (N_eff ≈ 1.3 from a nominal 5) and "pricing" covers both
+halves of the contribution: the corrected posterior prices agreement,
+and DEFT prices the committee itself.
 
 ---
 
@@ -37,6 +44,11 @@ committees under three diversity regimes across science, medicine, and law.*
 4. **A methodological note on agent-competence confounds in ρ
    measurement.** Adding a low-competence agent artificially lowers ρ
    without adding genuine diversification.
+5. **DEFT, a ρ-aware committee-selection protocol.** Roster optimization
+   does not survive domain shift (accuracy ranks and even ρ structure
+   are domain-specific), but Floor → Size → Fill → Price driven by the
+   design effect beats the N-seeds industry default in every domain at
+   3–9× lower cost. (Algorithm 1, §3.4; results in analysis/05)
 
 ## Paper outline
 
@@ -73,6 +85,73 @@ committees under three diversity regimes across science, medicine, and law.*
   independence and under N_eff correction.
 - **3.3 Cluster analysis.** Bin items by largest same-answer cluster size k;
   measure observed correctness at each k.
+- **3.4 The DEFT algorithm** (Design-Effect-guided Frugal Teams) — the
+  paper's centerpiece. The design-effect formula run in reverse: instead
+  of diagnosing an existing committee, it decides who sits on the next
+  one, how many seats it has, and when its agreement may be trusted.
+
+  **Problem (committee decision under constraints).** Given a candidate
+  pool M = {m₁,…,m_K}, per-model cost c(m), a small calibration set
+  D_cal, and constraints (max size N_max, cost budget B, deployment
+  confidence target τ), choose a committee S ⊆ M and a decision rule
+  that (i) maximizes accuracy-per-cost and (ii) emits calibrated
+  confidence — under the empirical constraints that error correlation
+  ρ is large, domain-specific, and roster fine-tuning does not survive
+  domain shift (§5.6).
+
+```text
+─────────────────────────────────────────────────────────────────────────
+Algorithm 1  DEFT — Design-Effect-guided Frugal Teams
+─────────────────────────────────────────────────────────────────────────
+Input:   pool M;  calibration items D_cal;  cost c(m)
+Constraints: N_max, budget B, confidence target τ
+Params:  floor width δ = 0.10;  marginal-evidence threshold ε = 0.10
+Output:  committee S ⊆ M;  decision rule DECIDE(·)
+
+Phase I — CALIBRATE                       O(K·|D_cal|) model calls, once
+1: for each m ∈ M:  p̂_m ← accuracy of m on D_cal
+2: for each pair i<j: ρ̂_ij ← Pearson corr. of error indicators on D_cal
+
+Phase II — SELECT                         O(K log K), no model calls
+3: Q ← { m ∈ M : p̂_m ≥ max_{m′} p̂_{m′} − δ }                 ▷ FLOOR
+4: ρ̂ ← mean_{i<j ∈ Q} ρ̂_ij ;   N_eff(N) ≔ N / (1 + (N−1)·ρ̂)  ▷ Kish
+5: N* ← largest N ≤ min(N_max,|Q|) with N_eff(N) − N_eff(N−1) ≥ ε ▷ SIZE
+6: S ← N* cheapest members of Q subject to Σ c(m) ≤ B          ▷ FILL
+
+Phase III — DECIDE (per deployment item x)                     ▷ PRICE
+7: each m ∈ S answers x;  a* ← plurality answer, k ← its votes
+8: k_eff ← k · N_eff(|S|) / |S|
+9: q ← BayesPosterior(k_eff, p̄_S, C)          // corrected, not naive
+10: return (a*, q);  ACCEPT iff q ≥ τ, else escalate/abstain
+─────────────────────────────────────────────────────────────────────────
+```
+
+  **Why each line is what it is** — every step is licensed by a measured
+  failure of something greedier:
+
+  | Line | Choice | Licensed by |
+  |---|---|---|
+  | 3 | floor on p̂, not ρ̂-minimization | competence confound: within-domain, low ρ̄ *predicts* weak members, not diverse ones (§5.5, §5.6/C2) |
+  | 5 | size from ρ̂ alone | committee saturation: best-3 ≈ best-any-size, full pool worse (§5.6/C1); the marginal hire must add ≥ ε effective agents |
+  | 6 | fill by cost, not roster search | roster ranks do not transfer across domains (Spearman as low as −0.54, §5.6/C3); optimizing them is fitting noise |
+  | 9 | corrected posterior, not vote fraction | the naive Condorcet posterior overshoots observed accuracy by 19–37 points at k=2 (§5.4) |
+
+  **Worked example (our data, ε = 0.10).** Medicine: ρ̂ = 0.65 →
+  marginal N_eff gains are 0.21 (N=2), 0.09 (N=3) → N* = 2; DEFT seats
+  {claude, kimi} for 297 tok/item and scores 0.832 vs 0.817 for five
+  DeepSeek seeds at 2,759. Law: ρ̂ = 0.51 → gains 0.33 (N=2), 0.16
+  (N=3), 0.096 (N=4) → N* = 3. The same ε yields different committee
+  sizes because the measured correlation differs — the algorithm, not
+  the operator, makes that call.
+
+  **Properties.** Selection is deterministic given D_cal; Phase II is
+  pure arithmetic (re-runnable per domain for free); total calibration
+  cost is K·|D_cal| calls (~100 items suffice — ρ̂ enters only through
+  the N_eff staircase, which changes decisions only at wide thresholds,
+  so it is robust to calibration noise); monotone in constraints
+  (shrinking B or N_max never increases cost). Reference implementation:
+  `rho_collapse.committee.protocol_select` (+ `RhoEstimator.bayes_posterior`
+  for Phase III).
 
 ### 4. Experimental setup
 
@@ -106,6 +185,16 @@ committees under three diversity regimes across science, medicine, and law.*
   (see analysis/03)
 - **5.5 Ablation: agent-competence confound.** Excluding Kimi K2 raises
   D2/D3 ρ by 0.09–0.18. (see analysis/02)
+- **5.6 The selection problem.** Enumerating all 219 committees from the
+  8-model pool: small committees saturate (best-3 ≈ best-any-size; the
+  full pool is worse), ρ-minimizing selection inherits the competence
+  confound, and neither accuracy ranks nor ρ structure transfer across
+  domains. (see analysis/05)
+- **5.7 DEFT beats current practice.** Floor by accuracy → size by
+  marginal N_eff → fill by cost → price with the corrected posterior
+  (Algorithm 1). Beats 5-seeds-of-one-model everywhere at 3–9× lower
+  cost; in law, five T=0.7 seeds underperform a single T=0 call.
+  (see analysis/05)
 
 ### 6. Discussion
 
@@ -123,6 +212,8 @@ committees under three diversity regimes across science, medicine, and law.*
 - The correction is small, portable, and empirically calibrated
 - Cross-culture diversity is not automatically superior to same-culture
   diversity
+- Measure ρ to size and price your committee, not to pick a magic
+  roster — the design-effect formula doubles as a procurement rule
 
 ### Data & code release
 

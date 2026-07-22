@@ -87,12 +87,60 @@ in [`analysis/03_overconfidence_gap.md`](./analysis/03_overconfidence_gap.md).
 
 ---
 
+## Finding 5 — Committee selection: rosters don't transfer, but a ρ-aware sizing protocol beats current practice
+
+Added post-freeze from the same T=0 sweep (all 8 models × all 750 items, so
+every subset of the pool is a scoreable committee). Full analysis in
+[`analysis/05_committee_selection.md`](./analysis/05_committee_selection.md);
+tables in [`committee-selection/`](./committee-selection/).
+
+**5a — Small committees saturate.** The best size-3 committee matches or beats
+the best committee of any size (law 0.715 / med 0.858 / sci 0.918); the full
+8-model pool is *worse* (0.699 / 0.851 / 0.905). Exactly what the design
+effect predicts at ρ̄ ≈ 0.5–0.65: N_eff(3) ≈ 1.5 vs N_eff(8) ≈ 1.8.
+
+**5b — "Minimize ρ" is a trap.** Within every domain, committee ρ̄ correlates
+*positively* with plurality accuracy (Spearman +0.13 to +0.36) — the
+competence confound (Finding 4 ablation / analysis/02) at selection time.
+A corrected-evidence greedy loses to plain top-accuracy selection.
+
+**5c — Nothing transfers across domains.** Over the 56 size-5 committees,
+cross-domain rank correlations: accuracy −0.46 to +0.38, ρ̄ −0.54 to +0.19.
+Even the correlation structure is domain-specific; there is no "generally
+diverse" roster.
+
+**5d — The DEFT algorithm** (Design-Effect-guided Frugal Teams; Algorithm 1
+in [`paper/draft.md`](./paper/draft.md) §3.4). Calibrate once (~100 items) →
+**Floor** (drop models >10 pts below the pool's best) → **Size** (grow N only
+while the marginal hire adds ≥ 0.1 effective agents at measured ρ̂) →
+**Fill** (cheapest qualifying models under budget) → **Price** (decide with
+the corrected posterior, accept iff q ≥ τ). Head-to-head vs the industry
+default (5 seeds of DeepSeek V4, rescored with identical abstention voting):
+
+| Domain | Protocol | Acc | Cost (tok/item) | 5 seeds acc | 5 seeds cost |
+|---|---|---|---|---|---|
+| Law | claude+gemini+gpt5-mini | **0.667** | 1,557 | 0.585 | 4,665 |
+| Medicine | claude+kimi (N=2) | **0.832** | 297 | 0.817 | 2,759 |
+| Science | claude+gpt5-mini+kimi | **0.891** | 815 | 0.867 | 3,823 |
+
+Wins every domain at 3–9× lower cost. Two quotables: in law, five T=0.7
+seeds (0.585) score below a *single* T=0 call (0.611) — temperature sampling
+plus voting is not ensembling; and in medicine the measured ρ̂ prices the
+third committee member below threshold, so the protocol buys a committee
+of two.
+
+---
+
 ## Bottom line for the paper
 
 - **D1 collapse:** committee ≈ 1.3 effective agents. Universal across domains.
 - **Cross-family diversity:** helps, but not to independence.
 - **Cross-culture:** wins in science, marginal/loses in law — refines rather than reverses the "diversity helps" narrative.
 - **Overconfidence gap:** intact and dramatic.
+- **Selection:** rosters and even ρ structure are domain-specific; what
+  survives is the sizing protocol — measure ρ to *size and price* the
+  committee, not to pick a magic roster. Beats N-seeds practice everywhere
+  at a fraction of the cost.
 
 **Paper is publishable.** Numbers are robust to filtering choices; only
 Science D1's saturation warrants explicit caveating.

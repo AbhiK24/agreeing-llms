@@ -1,0 +1,539 @@
+{
+  "split_half": {
+    "science": {
+      "rho_greedy": {
+        "mean": 0.8886666666666667,
+        "std": 0.018686893802876938,
+        "modal_committee": "claude_sonnet+deepseek_v4+gemini_pro+gpt5_mini+kimi_k2"
+      },
+      "rho_exhaustive": {
+        "mean": 0.8917333333333332,
+        "std": 0.01652257714630367,
+        "modal_committee": "claude_sonnet+deepseek_v4+gemini_pro+gpt5_mini+kimi_k2"
+      },
+      "top_acc": {
+        "mean": 0.9001333333333335,
+        "std": 0.015169560163549768,
+        "modal_committee": "bytedance_seed+deepseek_v4+gpt5_mini+kimi_k2+qwen_3"
+      },
+      "empirical": {
+        "mean": 0.8999,
+        "std": 0.013684175775934285,
+        "modal_committee": "bytedance_seed+claude_sonnet+deepseek_v4+gpt5_mini+qwen_3"
+      },
+      "random": {
+        "mean": 0.8977999999999999,
+        "std": 0.018523378621503044
+      }
+    },
+    "medicine": {
+      "rho_greedy": {
+        "mean": 0.8439333333333334,
+        "std": 0.01783118367106093,
+        "modal_committee": "claude_sonnet+deepseek_v4+glm_46+gpt5_mini+qwen_3"
+      },
+      "rho_exhaustive": {
+        "mean": 0.8450333333333333,
+        "std": 0.01793008025017673,
+        "modal_committee": "claude_sonnet+deepseek_v4+glm_46+kimi_k2+qwen_3"
+      },
+      "top_acc": {
+        "mean": 0.8480666666666664,
+        "std": 0.020332677585054495,
+        "modal_committee": "claude_sonnet+deepseek_v4+gemini_pro+glm_46+gpt5_mini"
+      },
+      "empirical": {
+        "mean": 0.8422000000000001,
+        "std": 0.015182006894127454,
+        "modal_committee": "bytedance_seed+claude_sonnet+gemini_pro+glm_46+gpt5_mini"
+      },
+      "random": {
+        "mean": 0.8470666666666669,
+        "std": 0.020059245582357617
+      }
+    },
+    "law": {
+      "rho_greedy": {
+        "mean": 0.6800733333333333,
+        "std": 0.03903754261391633,
+        "modal_committee": "claude_sonnet+deepseek_v4+gemini_pro+glm_46+qwen_3"
+      },
+      "rho_exhaustive": {
+        "mean": 0.6787933333333334,
+        "std": 0.03708183083098483,
+        "modal_committee": "bytedance_seed+claude_sonnet+gemini_pro+glm_46+qwen_3"
+      },
+      "top_acc": {
+        "mean": 0.6939733333333333,
+        "std": 0.038629168023945615,
+        "modal_committee": "bytedance_seed+claude_sonnet+gemini_pro+gpt5_mini+qwen_3"
+      },
+      "empirical": {
+        "mean": 0.6881200000000001,
+        "std": 0.03673576277507608,
+        "modal_committee": "bytedance_seed+claude_sonnet+gemini_pro+kimi_k2+qwen_3"
+      },
+      "random": {
+        "mean": 0.6685466666666666,
+        "std": 0.038816580649682846
+      }
+    }
+  },
+  "lodo": {
+    "law": {
+      "rho_greedy": {
+        "members": [
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "gpt5_mini",
+          "kimi_k2"
+        ],
+        "accuracy": 0.6634666666666665,
+        "n_items": 250
+      },
+      "rho_exhaustive": {
+        "members": [
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "gpt5_mini",
+          "kimi_k2"
+        ],
+        "accuracy": 0.6634666666666665,
+        "n_items": 250
+      },
+      "top_acc": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "deepseek_v4",
+          "gpt5_mini",
+          "kimi_k2"
+        ],
+        "accuracy": 0.67,
+        "n_items": 250
+      },
+      "empirical": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "deepseek_v4",
+          "gpt5_mini",
+          "kimi_k2"
+        ],
+        "accuracy": 0.67,
+        "n_items": 250
+      },
+      "oracle": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "gemini_pro",
+          "kimi_k2",
+          "qwen_3"
+        ],
+        "accuracy": 0.716
+      },
+      "random_expectation": {
+        "accuracy": 0.6774666666666667
+      }
+    },
+    "medicine": {
+      "rho_greedy": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "gpt5_mini"
+        ],
+        "accuracy": 0.8563333333333333,
+        "n_items": 250
+      },
+      "rho_exhaustive": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "glm_46"
+        ],
+        "accuracy": 0.8476666666666668,
+        "n_items": 250
+      },
+      "top_acc": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "deepseek_v4",
+          "gpt5_mini",
+          "qwen_3"
+        ],
+        "accuracy": 0.849,
+        "n_items": 250
+      },
+      "empirical": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "gemini_pro",
+          "kimi_k2",
+          "qwen_3"
+        ],
+        "accuracy": 0.839,
+        "n_items": 250
+      },
+      "oracle": {
+        "members": [
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "gpt5_mini",
+          "kimi_k2"
+        ],
+        "accuracy": 0.8613333333333333
+      },
+      "random_expectation": {
+        "accuracy": 0.8479523809523809
+      }
+    },
+    "science": {
+      "rho_greedy": {
+        "members": [
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "glm_46",
+          "qwen_3"
+        ],
+        "accuracy": 0.894,
+        "n_items": 250
+      },
+      "rho_exhaustive": {
+        "members": [
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "glm_46",
+          "qwen_3"
+        ],
+        "accuracy": 0.894,
+        "n_items": 250
+      },
+      "top_acc": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "gpt5_mini"
+        ],
+        "accuracy": 0.9073333333333332,
+        "n_items": 250
+      },
+      "empirical": {
+        "members": [
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "kimi_k2",
+          "qwen_3"
+        ],
+        "accuracy": 0.897,
+        "n_items": 250
+      },
+      "oracle": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "deepseek_v4",
+          "gpt5_mini",
+          "qwen_3"
+        ],
+        "accuracy": 0.9163333333333332
+      },
+      "random_expectation": {
+        "accuracy": 0.9003333333333333
+      }
+    }
+  },
+  "regret": {
+    "law": {
+      "law": 0.0,
+      "medicine": 0.022333333333333316,
+      "science": 0.007000000000000006
+    },
+    "medicine": {
+      "law": 0.05253333333333343,
+      "medicine": 0.0,
+      "science": 0.02100000000000002
+    },
+    "science": {
+      "law": 0.0259999999999998,
+      "medicine": 0.012333333333333307,
+      "science": 0.0
+    }
+  },
+  "evidence_spearman": {
+    "science": -0.19109830611739664,
+    "medicine": 0.09657839735858165,
+    "law": 0.5867596298584024
+  },
+  "rank_transfer": {
+    "law vs medicine": {
+      "acc_spearman": -0.23119415014177508,
+      "rho_spearman": 0.19282296650717703
+    },
+    "law vs science": {
+      "acc_spearman": 0.38217547584190215,
+      "rho_spearman": -0.3015721120984279
+    },
+    "medicine vs science": {
+      "acc_spearman": -0.4545376773587475,
+      "rho_spearman": -0.5412850307587149
+    }
+  },
+  "head_to_head": {
+    "science": {
+      "protocol": {
+        "members": [
+          "claude_sonnet",
+          "gpt5_mini",
+          "kimi_k2"
+        ],
+        "accuracy": 0.8906666666666666,
+        "cost": 814.520802848242,
+        "trace": [
+          {
+            "floor": 0.8166666666666667,
+            "qualifying": [
+              "bytedance_seed",
+              "claude_sonnet",
+              "deepseek_v4",
+              "glm_46",
+              "gpt5_mini",
+              "kimi_k2",
+              "qwen_3"
+            ],
+            "rho_hat": 0.5589903365756422,
+            "target_size": 3,
+            "spent": 814.520802848242
+          }
+        ]
+      },
+      "top5_acc": {
+        "members": [
+          "bytedance_seed",
+          "deepseek_v4",
+          "gpt5_mini",
+          "kimi_k2",
+          "qwen_3"
+        ],
+        "accuracy": 0.91,
+        "cost": 5946.9848351063065
+      },
+      "full_pool": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "glm_46",
+          "gpt5_mini",
+          "kimi_k2",
+          "qwen_3"
+        ],
+        "accuracy": 0.9046666666666667,
+        "cost": 7950.631501772974
+      },
+      "same_model_5seeds": {
+        "accuracy": 0.867,
+        "n_items": 250,
+        "n_seeds": 5,
+        "cost": 3823.0200000000004
+      }
+    },
+    "medicine": {
+      "protocol": {
+        "members": [
+          "claude_sonnet",
+          "kimi_k2"
+        ],
+        "accuracy": 0.832,
+        "cost": 296.91866666666664,
+        "trace": [
+          {
+            "floor": 0.7509316770186335,
+            "qualifying": [
+              "bytedance_seed",
+              "claude_sonnet",
+              "deepseek_v4",
+              "gemini_pro",
+              "glm_46",
+              "gpt5_mini",
+              "kimi_k2",
+              "qwen_3"
+            ],
+            "rho_hat": 0.6476847493003107,
+            "target_size": 2,
+            "spent": 296.91866666666664
+          }
+        ]
+      },
+      "top5_acc": {
+        "members": [
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "glm_46",
+          "gpt5_mini"
+        ],
+        "accuracy": 0.8593333333333333,
+        "cost": 3291.7094695149085
+      },
+      "full_pool": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "glm_46",
+          "gpt5_mini",
+          "kimi_k2",
+          "qwen_3"
+        ],
+        "accuracy": 0.851,
+        "cost": 7950.631501772974
+      },
+      "same_model_5seeds": {
+        "accuracy": 0.8173333333333334,
+        "n_items": 250,
+        "n_seeds": 5,
+        "cost": 2758.884
+      }
+    },
+    "law": {
+      "protocol": {
+        "members": [
+          "claude_sonnet",
+          "gemini_pro",
+          "gpt5_mini"
+        ],
+        "accuracy": 0.6666666666666667,
+        "cost": 1557.4754695149088,
+        "trace": [
+          {
+            "floor": 0.6254098360655738,
+            "qualifying": [
+              "bytedance_seed",
+              "claude_sonnet",
+              "gemini_pro",
+              "gpt5_mini",
+              "qwen_3"
+            ],
+            "rho_hat": 0.5093009777082763,
+            "target_size": 3,
+            "spent": 1557.4754695149088
+          }
+        ]
+      },
+      "top5_acc": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "gemini_pro",
+          "gpt5_mini",
+          "qwen_3"
+        ],
+        "accuracy": 0.7078,
+        "cost": 5999.7455017729735
+      },
+      "full_pool": {
+        "members": [
+          "bytedance_seed",
+          "claude_sonnet",
+          "deepseek_v4",
+          "gemini_pro",
+          "glm_46",
+          "gpt5_mini",
+          "kimi_k2",
+          "qwen_3"
+        ],
+        "accuracy": 0.6986666666666668,
+        "cost": 7950.631501772974
+      },
+      "same_model_5seeds": {
+        "accuracy": 0.5850000000000001,
+        "n_items": 250,
+        "n_seeds": 5,
+        "cost": 4665.204
+      }
+    }
+  },
+  "constrained_demo": {
+    "per_domain": {
+      "law": {
+        "unconstrained": [
+          "gemini_pro",
+          "qwen_3",
+          "glm_46",
+          "claude_sonnet",
+          "deepseek_v4"
+        ],
+        "unconstrained_cost": 5935.623333333334,
+        "unconstrained_acc": 0.7008,
+        "budgeted": [
+          "gemini_pro",
+          "claude_sonnet",
+          "deepseek_v4",
+          "bytedance_seed",
+          "kimi_k2"
+        ],
+        "budgeted_cost": 3307.7400322580647,
+        "budgeted_acc": 0.7061333333333332
+      },
+      "medicine": {
+        "unconstrained": [
+          "glm_46",
+          "qwen_3",
+          "deepseek_v4",
+          "claude_sonnet",
+          "kimi_k2"
+        ],
+        "unconstrained_cost": 5192.6686666666665,
+        "unconstrained_acc": 0.8523333333333334,
+        "budgeted": [
+          "glm_46",
+          "gpt5_mini",
+          "kimi_k2",
+          "deepseek_v4",
+          "claude_sonnet"
+        ],
+        "budgeted_cost": 2548.754802848242,
+        "budgeted_acc": 0.8566666666666667
+      },
+      "science": {
+        "unconstrained": [
+          "gpt5_mini",
+          "claude_sonnet",
+          "kimi_k2",
+          "gemini_pro",
+          "deepseek_v4"
+        ],
+        "unconstrained_cost": 2544.5881361815755,
+        "unconstrained_acc": 0.8953333333333332,
+        "budgeted": [
+          "gpt5_mini",
+          "claude_sonnet",
+          "kimi_k2",
+          "gemini_pro",
+          "deepseek_v4"
+        ],
+        "budgeted_cost": 2544.5881361815755,
+        "budgeted_acc": 0.8953333333333332
+      }
+    },
+    "budget": 3561.3740000000003
+  }
+}
